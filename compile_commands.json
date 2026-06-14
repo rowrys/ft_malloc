@@ -1,0 +1,21 @@
+[
+ {
+  "directory": "/home/mewen/project/perso/ft_malloc",
+  "arguments": [
+   "cc",
+   "-MP",
+   "-MMD",
+   "-Wall",
+   "-Werror",
+   "-Wextra",
+   "-g",
+   "-I",
+   "includes/",
+   "srcs/ft_malloc.c",
+   "-c",
+   "-o",
+   ".build/ft_malloc.o"
+  ],
+  "file": "srcs/ft_malloc.c"
+ }
+]
