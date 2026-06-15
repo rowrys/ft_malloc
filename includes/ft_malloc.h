@@ -35,9 +35,6 @@ pour ragarder ou peux etre inserer un chunk il suffit de:
 	sachant que cette espace peux etre fragmenter et donc donne une indication contre intuitif. 
 */
 
-#define N 256
-#define M 1024
-
 typedef struct s_page {
 	void	*chunk;
 	void	*next;
@@ -56,22 +53,9 @@ typedef struct s_malloc {
 }	t_malloc;
 
 typedef enum e_memory_zone {
-	tiny,
-	small,
-	large,
+	TINY,
+	SMALL,
+	LARGE,
 } t_memory_zone;
-
-/*
-hummm non je la trouve tres bien !
-elle est assez legerte je trouve !!! honnetement je suis compthend de cette struct !
-et toi tu en penses quoi ?
-perso il y a encore un truc ou je me tate, mais je viend davoir une idee !
-jai aussi cette struct que tu na pas vue, "typedef struct s_malloc {
-    t_page  *tiny;
-    t_page  *small;
-    t_page  *large;
-}   t_malloc;"
-elle est declarer en dehord des fonction elle est donc global, (on a le droit dans le sujet(a une)) du coup  
-*/
 
 #endif

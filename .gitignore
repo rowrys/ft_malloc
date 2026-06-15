@@ -1,0 +1,5 @@
+ft_malloc
+.cache
+compile_commands.json
+peda-session-ft_malloc.txt
+.build
