@@ -17,15 +17,24 @@
  * @param end_addr Address of the second chunk
  * @return size_t Number of bytes available between the two chunks
  */
-size_t	get_free_space_between(void *start_addr, void *end_addr);
+size_t	get_free_space_between(void *current_page, void *start_addr, void *end_addr);
 
 /**
  * @brief Initializes a tiny or small zone and adds the first chunk
  * 
  * @param zone_type The type of zone to initialize
  * @param size Size of the first chunk
- * @return void* On success, returns a pointer to the first usable address after the page header. On failure, returns MAP_FAILED
+ * @return void* On success, returns a pointer to the first usable address after the page header and chunk header. On failure, returns MAP_FAILED
  */
 void*	init_zone(int zone_type, size_t size);
+
+/**
+ * @brief Initializes the first chunk of the page.
+ * 
+ * @param current_page witch page to init
+ * @param size Size of the first data
+ * @return void* Returns a pointer to the first usable address after the page header and chunk header
+ */
+void*	init_page(void* current_page, int size);
 
 #endif
