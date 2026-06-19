@@ -1,39 +1,7 @@
 #ifndef FT_MALLOC_H
 # define FT_MALLOC_H
 
-#include <stddef.h>
-
-
-// https://sourceware.org/glibc/wiki/MallocInternals
-
-/*
-PAGE
-*--------**--------*
-|H       ||H       |
-|e       ||e       |
-|C       ||C       |
-|i       ||        |
-|e       ||        |
-|C       ||        |
-|e       ||e       |
-|        ||        |
-|C       ||        |
-|i       ||        |
-|e       ||        |
-|        ||        |
-|        ||        |
-*--------**--------*
-*/
-
-/*
-pour ragarder ou peux etre inserer un chunk il suffit de:
-	prend le fin du chunk actuelle et faire la diff avec le chunk->next
-	get_size_beetwin_chunk(void *end_addr_start_chunk, void *start_addr_end_chunk)
-	ici dans cette fonctio is il ny a pas de start chunk ou de end chunk  on prendra start_page et end_page.
-
-	pour completer ce process il faut regarder si il est intersent de stocker dans le header_page le nombre despace encore libre dans la page
-	sachant que cette espace peux etre fragmenter et donc donne une indication contre intuitif. 
-*/
+# include <stddef.h>
 
 typedef struct s_page {
 	void	*chunk;
@@ -45,7 +13,6 @@ typedef struct s_chunk {
 	void	*next;
 }	t_chunk;
 
-/* tiny et small on le meme foncitonement un header page et des chunk, pour large une addrs une data!*/
 typedef struct s_malloc {
 	t_page	*tiny;
 	t_page	*small;

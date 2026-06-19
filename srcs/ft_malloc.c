@@ -34,6 +34,22 @@ allocate_large(size_t size) {
 
 
 static void*
+allocate_new_pages(t_page* prev_page, size_t size) {
+	void*		pages;
+	int const	page_size = sysconf(_SC_PAGE_SIZE);	
+
+	pages = mmap(NULL, page_size * INIT_ZONE_NB_PAGE_DEFAULT, MALLOC_PROT_MMAP, MALLOC_FLAG_MMAP, -1, 0);
+	if (pages == MAP_FAILED)
+		return (pages);
+
+	prev_page->next = pages;
+	*(t_page *)pages = (t_page) {.chunk = pages + sizeof(t_page) + sizeof(t_chunk), .next = pages + page_size};
+	*(t_chunk *)(pages + sizeof(t_page)) = (t_chunk) {.next = NULL, .size = size};
+	*(t_page *)(pages + page_size) = (t_page) {.chunk = NULL, .next = NULL};
+	return (pages + sizeof(t_page) + sizeof(t_chunk));
+}
+
+static void*
 insert_new_chunk(t_chunk* current_chunk, t_chunk* next_chunk, size_t size) {
 	void*	new_chunk;
 
@@ -69,8 +85,8 @@ alloc_tiny(size_t size) {
 		prev_page = current_page;
 		current_page = current_page->next;
 	}
-	// result = allocat_new_page(prev_page, TINY);
-	return (NULL);
+	result = allocate_new_pages(prev_page, size);
+	return (result);
 }
 
 

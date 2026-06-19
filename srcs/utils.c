@@ -38,13 +38,12 @@ init_zone(int zone_type, size_t size) {
 	if (pages == MAP_FAILED)
 		return (MAP_FAILED);
 
-	*(t_page *)pages = (t_page) {.chunk = pages + sizeof(t_page), .next = pages + page_size};
+	*(t_page *)pages = (t_page) {.chunk = pages + sizeof(t_page) + sizeof(t_chunk), .next = pages + page_size};
 	*(t_chunk *)(pages + sizeof(t_page)) = (t_chunk) {.next = NULL, .size = size};
 	*(t_page *)(pages + page_size) = (t_page) {.chunk = NULL, .next = NULL};
 	*current_page = pages;
 	return (pages + sizeof(t_page) + sizeof(t_chunk));
 }
-
 
 void*
 insert_new_chunk_after_page_header(void* current_page, size_t size) {
