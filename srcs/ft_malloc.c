@@ -60,7 +60,7 @@ insert_new_chunk(t_chunk* current_chunk, t_chunk* next_chunk, size_t size) {
 }
 
 void*
-alloc_tiny(size_t size) {
+alloc(size_t size, int type) {
 	void*		result;
 	t_page*		prev_page;
 	t_page*		current_page;
@@ -68,10 +68,9 @@ alloc_tiny(size_t size) {
 	t_chunk*	next_chunk;
 
 	result = NULL;
-	current_page = g_malloc.tiny;
-	if (!g_malloc.tiny)
-		return (init_zone(TINY, size));
-	current_page = g_malloc.tiny;
+	current_page = (type == TINY) ? g_malloc.tiny : g_malloc.small;
+	if (!current_page)
+		return (init_zone(type, size));
 	while (current_page) {
 		current_chunk = current_page->chunk;
 		if (!current_chunk || ((void*)current_page + sizeof(t_page)) - (void*)current_chunk >= size)
@@ -89,7 +88,6 @@ alloc_tiny(size_t size) {
 	return (result);
 }
 
-
 void*
 ft_malloc(size_t size) {
 	void*	result;
@@ -101,12 +99,12 @@ ft_malloc(size_t size) {
 	rest = size & (_Alignof(void*) - 1);
 	if (rest)
 		size = size + _Alignof(void*) - rest;
-	// if (size <= N)
-	result = alloc_tiny(size);
-	// else if (size <= M)
-	// 	resutl = allocate_small(size);
-	// else
-		// resutl = allocate_large(size);
+	if (size <= N)
+		result = alloc(size, TINY);
+	else if (size <= M)
+		result = alloc(size, SMALL);
+	else
+		result = allocate_large(size);
 	if (result == MAP_FAILED)
 		result = NULL;
 	return (result);
