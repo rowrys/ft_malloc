@@ -45,11 +45,13 @@ init_zone(int zone_type, size_t size) {
 	return (pages + sizeof(t_page) + sizeof(t_chunk));
 }
 
-void*
-init_page(void* current_page, int size) {
-	void*	first_chunk;
 
+void*
+insert_new_chunk_after_page_header(void* current_page, size_t size) {
+	t_page*	page;
+
+	page = current_page;
 	current_page += sizeof(t_page);
-	*(t_chunk *)current_page = (t_chunk) {.next = NULL, .size = size};
-	return (first_chunk + sizeof(t_chunk));
+	*(t_chunk *)current_page = (t_chunk) {.next = page->chunk, .size = size};
+	return (current_page + sizeof(t_chunk));
 }

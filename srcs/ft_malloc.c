@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <linux/limits.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <sys/mman.h>
 #include <unistd.h>
 
@@ -44,11 +45,11 @@ insert_new_chunk(t_chunk* current_chunk, t_chunk* next_chunk, size_t size) {
 
 void*
 alloc_tiny(size_t size) {
-	void*	result;
-	t_page*	prev_page;
-	t_page*	current_page;
-	t_chunk* current_chunk;
-	t_chunk* next_chunk;
+	void*		result;
+	t_page*		prev_page;
+	t_page*		current_page;
+	t_chunk*	current_chunk;
+	t_chunk*	next_chunk;
 
 	result = NULL;
 	current_page = g_malloc.tiny;
@@ -57,8 +58,8 @@ alloc_tiny(size_t size) {
 	current_page = g_malloc.tiny;
 	while (current_page) {
 		current_chunk = current_page->chunk;
-		if (!current_chunk)
-			return (init_page(current_page, size));
+		if (!current_chunk || ((void*)current_page + sizeof(t_page)) - (void*)current_chunk >= size)
+			return (insert_new_chunk_after_page_header(current_page, size));
 		while (current_chunk) {
 			next_chunk = current_chunk->next;
 			if (get_free_space_between(current_page, current_chunk, next_chunk) >= size)
@@ -76,15 +77,16 @@ alloc_tiny(size_t size) {
 void*
 ft_malloc(size_t size) {
 	void*	result;
+	uint8_t	rest;
 
 	if (!size)
 		return (NULL);
 
-	size = size + _Alignof(void*) - (size & (_Alignof(void*) - 1));
+	rest = size & (_Alignof(void*) - 1);
+	if (rest)
+		size = size + _Alignof(void*) - rest;
 	// if (size <= N)
-
 	result = alloc_tiny(size);
-	
 	// else if (size <= M)
 	// 	resutl = allocate_small(size);
 	// else
@@ -97,11 +99,16 @@ ft_malloc(size_t size) {
 int main(void) {
 	t_page*		page;
 	t_chunk*	chunk;
+	t_chunk*	chunk2;
 	void* ptr = ft_malloc(5);
+	void* ptr2 = ft_malloc(7);
 
 	page = ptr - sizeof(t_chunk) - sizeof(t_page);
 	chunk = ptr - sizeof(t_chunk);
 	printf("%p\n", page->chunk);
 	printf("%p\n", chunk);
+
+	chunk2 = ptr2 - sizeof(t_chunk);
+	printf("%lu\n", chunk2->size);
 	return (0);
 }

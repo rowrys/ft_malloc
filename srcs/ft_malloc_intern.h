@@ -29,12 +29,13 @@ size_t	get_free_space_between(void *current_page, void *start_addr, void *end_ad
 void*	init_zone(int zone_type, size_t size);
 
 /**
- * @brief Initializes the first chunk of the page.
+ * @brief this fonction insert a chunk at page + sizeof(t_page)
  * 
- * @param current_page witch page to init
+ * @param current_page witch page to insert chunk
  * @param size Size of the first data
  * @return void* Returns a pointer to the first usable address after the page header and chunk header
  */
-void*	init_page(void* current_page, int size);
+void*
+insert_new_chunk_after_page_header(void* current_page, size_t size);
 
 #endif
