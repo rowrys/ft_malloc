@@ -18,7 +18,8 @@ allocate_large(size_t size) {
 	void*			new_memory;
 	t_page			page_header;
 	int const		page_size = sysconf(_SC_PAGE_SIZE);
-	size_t const	allocated_memory = size + page_size - (size & (page_size - 1));
+	int const		rest = size & (page_size - 1);
+	size_t const	allocated_memory = (rest) ? size + page_size - (rest) : size;
 
 	new_memory = mmap(NULL, allocated_memory, MALLOC_PROT_MMAP, MALLOC_FLAG_MMAP, -1, 0);
 	if (new_memory == MAP_FAILED)
@@ -61,13 +62,11 @@ insert_new_chunk(t_chunk* current_chunk, t_chunk* next_chunk, size_t size) {
 
 void*
 alloc(size_t size, int type) {
-	void*		result;
 	t_page*		prev_page;
 	t_page*		current_page;
 	t_chunk*	current_chunk;
 	t_chunk*	next_chunk;
 
-	result = NULL;
 	current_page = (type == TINY) ? g_malloc.tiny : g_malloc.small;
 	if (!current_page)
 		return (init_zone(type, size));
@@ -84,21 +83,17 @@ alloc(size_t size, int type) {
 		prev_page = current_page;
 		current_page = current_page->next;
 	}
-	result = allocate_new_pages(prev_page, size);
-	return (result);
+	return (allocate_new_pages(prev_page, size));
 }
 
 void*
 ft_malloc(size_t size) {
-	void*	result;
-	uint8_t	rest;
+	void*			result;
+	uint8_t	const	rest = size & (_Alignof(void*) - 1);
 
 	if (!size)
 		return (NULL);
-
-	rest = size & (_Alignof(void*) - 1);
-	if (rest)
-		size = size + _Alignof(void*) - rest;
+	size = (rest) ? size + _Alignof(void*) - rest : size;
 	if (size <= N)
 		result = alloc(size, TINY);
 	else if (size <= M)
