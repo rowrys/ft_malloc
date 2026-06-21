@@ -44,7 +44,7 @@ allocate_new_pages(t_page* prev_page, size_t size) {
 		return (pages);
 
 	prev_page->next = pages;
-	*(t_page *)pages = (t_page) {.chunk = pages + sizeof(t_page) + sizeof(t_chunk), .next = pages + page_size};
+	*(t_page *)pages = (t_page) {.chunk = pages + sizeof(t_page), .next = pages + page_size};
 	*(t_chunk *)(pages + sizeof(t_page)) = (t_chunk) {.next = NULL, .size = size};
 	*(t_page *)(pages + page_size) = (t_page) {.chunk = NULL, .next = NULL};
 	return (pages + sizeof(t_page) + sizeof(t_chunk));
@@ -72,7 +72,7 @@ alloc(size_t size, int type) {
 		return (init_zone(type, size));
 	while (current_page) {
 		current_chunk = current_page->chunk;
-		if (!current_chunk || ((void*)current_page + sizeof(t_page)) - (void*)current_chunk >= size)
+		if (!current_chunk || (size_t)current_chunk - ((size_t)current_page + sizeof(t_page)) >= size)
 			return (insert_new_chunk_after_page_header(current_page, size));
 		while (current_chunk) {
 			next_chunk = current_chunk->next;
