@@ -24,13 +24,13 @@ allocate_large(size_t size) {
 	new_memory = mmap(NULL, allocated_memory, MALLOC_PROT_MMAP, MALLOC_FLAG_MMAP, -1, 0);
 	if (new_memory == MAP_FAILED)
 		return (new_memory);
-	page_header.chunk = new_memory + sizeof(t_page);
+	page_header.chunk = ptr_add(new_memory, sizeof(t_page));
 	page_header.next = g_malloc.large;
 	g_malloc.large = new_memory;
 	*(t_page *)new_memory = page_header;
-	new_memory += sizeof(t_page);
+	new_memory = ptr_add(new_memory, sizeof(t_page));
 	*(t_chunk *)new_memory = (t_chunk) {.size = allocated_memory, .next = NULL};
-	return (new_memory + sizeof(t_chunk));
+	return (ptr_add(new_memory, sizeof(t_chunk)));
 }
 
 
@@ -44,20 +44,20 @@ allocate_new_pages(t_page* prev_page, size_t size) {
 		return (pages);
 
 	prev_page->next = pages;
-	*(t_page *)pages = (t_page) {.chunk = pages + sizeof(t_page), .next = pages + page_size};
-	*(t_chunk *)(pages + sizeof(t_page)) = (t_chunk) {.next = NULL, .size = size};
-	*(t_page *)(pages + page_size) = (t_page) {.chunk = NULL, .next = NULL};
-	return (pages + sizeof(t_page) + sizeof(t_chunk));
+	*(t_page *)pages = (t_page) {.chunk = ptr_add(pages, sizeof(t_page)), .next = ptr_add(pages, page_size)};
+	*(t_chunk *)(ptr_add(pages, sizeof(t_page))) = (t_chunk) {.next = NULL, .size = size};
+	*(t_page *)(ptr_add(pages, page_size)) = (t_page) {.chunk = NULL, .next = NULL};
+	return (ptr_add(pages, sizeof(t_page) + sizeof(t_chunk)));
 }
 
 static void*
 insert_new_chunk(t_chunk* current_chunk, t_chunk* next_chunk, size_t size) {
 	void*	new_chunk;
 
-	new_chunk = (void *)current_chunk + sizeof(t_chunk) + current_chunk->size;
+	new_chunk = ptr_add(current_chunk, sizeof(t_chunk) + current_chunk->size);
 	current_chunk->next = new_chunk;
 	*(t_chunk *)new_chunk = (t_chunk) {.size = size, .next = next_chunk};
-	return (new_chunk + sizeof(t_chunk));
+	return (ptr_add(new_chunk, sizeof(t_chunk)));
 }
 
 void*
@@ -112,12 +112,12 @@ int main(void) {
 	void* ptr = ft_malloc(5);
 	void* ptr2 = ft_malloc(7);
 
-	page = ptr - sizeof(t_chunk) - sizeof(t_page);
-	chunk = ptr - sizeof(t_chunk);
+	page = (void*)((uchar*)ptr - sizeof(t_chunk) - sizeof(t_page));
+	chunk = (void*)((uchar*)ptr - sizeof(t_chunk));
 	printf("%p\n", page->chunk);
-	printf("%p\n", chunk);
+	printf("%p\n", (void*)chunk);
 
-	chunk2 = ptr2 - sizeof(t_chunk);
+	chunk2 = (void*)((uchar*)ptr2 - sizeof(t_chunk));
 	printf("%lu\n", chunk2->size);
 	return (0);
 }

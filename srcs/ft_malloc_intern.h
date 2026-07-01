@@ -10,6 +10,13 @@
 # define MALLOC_PROT_MMAP PROT_READ | PROT_WRITE
 # define MALLOC_FLAG_MMAP MAP_ANONYMOUS | MAP_PRIVATE
 
+typedef unsigned char uchar;
+
+static inline void*
+ptr_add(void *p, size_t n) {
+	return (uchar*)p + n;
+}
+
 /**
  * @brief Returns the number of bytes available for allocation between two t_chunk
  * 
