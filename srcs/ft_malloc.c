@@ -25,14 +25,13 @@ allocate_large(size_t size) {
 	if (new_memory == MAP_FAILED)
 		return (new_memory);
 	page_header.chunk = ptr_add(new_memory, sizeof(t_page));
-	page_header.next = g_malloc.large;
-	g_malloc.large = new_memory;
+	page_header.next = g_malloc.map[LARGE];
+	g_malloc.map[LARGE] = new_memory;
 	*(t_page *)new_memory = page_header;
 	new_memory = ptr_add(new_memory, sizeof(t_page));
 	*(t_chunk *)new_memory = (t_chunk) {.size = allocated_memory, .next = NULL};
 	return (ptr_add(new_memory, sizeof(t_chunk)));
 }
-
 
 static void*
 allocate_new_pages(t_page* prev_page, size_t size) {
@@ -67,7 +66,7 @@ alloc(size_t size, int type) {
 	t_chunk*	current_chunk;
 	t_chunk*	next_chunk;
 
-	current_page = (type == TINY) ? g_malloc.tiny : g_malloc.small;
+	current_page = (type == TINY) ? g_malloc.map[TINY] : g_malloc.map[SMALL];
 	if (!current_page)
 		return (init_zone(type, size));
 	while (current_page) {

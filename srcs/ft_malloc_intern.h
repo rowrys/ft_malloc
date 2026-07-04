@@ -1,16 +1,41 @@
 #ifndef FT_MALLOC_INTERN
 # define FT_MALLOC_INTERN
 
+#include <stdint.h>
 # include <stddef.h>
 
-# define INIT_ZONE_NB_PAGE_DEFAULT 2
+/* please 1 < INIT_ZONE_NB_PAGE_DEFAULT < x */
+# define INIT_ZONE_NB_PAGE_DEFAULT 5
+/* please 1 < MAX_PAGE_BEFOR_FREE < x */
+# define MAX_PAGE_BEFOR_FREE 3
 # define N 256
-# define M 1024
+# define M 2048
 
 # define MALLOC_PROT_MMAP PROT_READ | PROT_WRITE
 # define MALLOC_FLAG_MMAP MAP_ANONYMOUS | MAP_PRIVATE
 
 typedef unsigned char uchar;
+
+typedef struct s_page {
+	void	*chunk;
+	void	*next;
+}	t_page;
+
+typedef struct s_chunk {
+	size_t	size;
+	void	*next;
+}	t_chunk;
+
+typedef struct s_malloc {
+	t_page	*map[3];
+}	t_malloc;
+
+typedef enum e_memory_zone {
+	TINY,
+	SMALL,
+	LARGE,
+} t_memory_zone;
+
 
 static inline void*
 ptr_add(void *p, size_t n) {
@@ -24,7 +49,7 @@ ptr_add(void *p, size_t n) {
  * @param end_addr Address of the second chunk
  * @return size_t Number of bytes available between the two chunks
  */
-size_t	get_free_space_between(void *current_page, void *start_addr, void *end_addr);
+size_t	get_free_space_between(void* current_page, t_chunk* start_addr, t_chunk* end_addr);
 
 /**
  * @brief Initializes a tiny or small zone and adds the first chunk
@@ -33,7 +58,7 @@ size_t	get_free_space_between(void *current_page, void *start_addr, void *end_ad
  * @param size Size of the first chunk
  * @return void* On success, returns a pointer to the first usable address after the page header and chunk header. On failure, returns MAP_FAILED
  */
-void*	init_zone(int zone_type, size_t size);
+void*	init_zone(uint8_t type, size_t size);
 
 /**
  * @brief this fonction insert a chunk at page + sizeof(t_page)
@@ -44,5 +69,7 @@ void*	init_zone(int zone_type, size_t size);
  */
 void*
 insert_new_chunk_after_page_header(void* current_page, size_t size);
+
+extern t_malloc g_malloc;
 
 #endif

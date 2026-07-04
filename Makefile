@@ -3,6 +3,7 @@ NAME := ft_malloc
 SRCS_DIR := srcs/
 SOURCES :=	ft_malloc.c	\
 			utils.c		\
+			ft_free.c	\
 
 SOURCES	:=	$(addprefix $(SRCS_DIR), $(SOURCES))
 
