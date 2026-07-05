@@ -1,5 +1,6 @@
 
 #include "ft_malloc_intern.h"
+#include "ft_printf.h"
 
 #include <assert.h>
 #include <stdint.h>
@@ -45,4 +46,28 @@ insert_new_chunk_after_page_header(void* current_page, size_t size) {
 	*(t_chunk *)(ptr_add(current_page, sizeof(t_page))) = (t_chunk) {.next = ((t_page *)current_page)->chunk, .size = size};
 	((t_page *)current_page)->chunk = ptr_add(current_page, sizeof(t_page));
 	return (ptr_add(current_page, sizeof(t_page) + sizeof(t_chunk)));
+}
+
+static void
+display_map(t_page* current_page) {
+	t_chunk*	current_chunk;
+
+	while (current_page) {
+		current_chunk = current_page->chunk;
+		while (current_chunk) {
+			printf("%p - %p: %lu bytes\n", ptr_add(current_chunk, sizeof(t_chunk)), ptr_add(current_chunk, current_chunk->size), current_chunk->size);
+			current_chunk = current_chunk->next;
+		}
+		current_page = current_page->next;
+	}
+}
+
+void
+show_alloc_mem(void) {
+	printf("TINY : %p\n", (void*)g_malloc.map[TINY]);
+	display_map(g_malloc.map[TINY]);
+	ft_printf("SMALL : %p\n", (void*)g_malloc.map[SMALL]);
+	display_map(g_malloc.map[SMALL]);
+	ft_printf("LARGE : %p\n", (void*)g_malloc.map[LARGE]);
+	display_map(g_malloc.map[LARGE]);
 }

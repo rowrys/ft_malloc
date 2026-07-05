@@ -105,18 +105,24 @@ ft_malloc(size_t size) {
 }
 
 int main(void) {
-	t_page*		page;
-	t_chunk*	chunk;
-	t_chunk*	chunk2;
 	void* ptr = ft_malloc(5);
 	void* ptr2 = ft_malloc(7);
+	void* PTR = ft_malloc(7458458);
+	void* PTR2 = ft_malloc(7458434558);
 
-	page = (void*)((uchar*)ptr - sizeof(t_chunk) - sizeof(t_page));
-	chunk = (void*)((uchar*)ptr - sizeof(t_chunk));
-	printf("%p\n", page->chunk);
-	printf("%p\n", (void*)chunk);
+	show_alloc_mem();
+	printf("\n\n\n");
 
-	chunk2 = (void*)((uchar*)ptr2 - sizeof(t_chunk));
-	printf("%lu\n", chunk2->size);
+	ft_free(ptr);
+	ft_free(ptr2);
+	ft_free(PTR);
+	show_alloc_mem();
+
+	printf("\n\n\n");
+	ft_free(PTR2);
+
+	show_alloc_mem();
+	printf("\n\n\n");
+
 	return (0);
 }

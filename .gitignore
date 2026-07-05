@@ -3,3 +3,4 @@ ft_malloc
 compile_commands.json
 peda-session-ft_malloc.txt
 .build
+libft
