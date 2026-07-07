@@ -42,12 +42,12 @@ check_for_remove_page(t_page* prev_last_empty_page, t_page* prev_page, t_page* p
 		prev_last_empty_page = prev_page;
 		last_empty_page = page;
 	}
-	if (nb_free_page >= MAX_PAGE_BEFOR_FREE || type == LARGE)
+	if (nb_free_page >= MAX_PAGE_BEFOR_FREE)
 		remove_page(prev_last_empty_page, last_empty_page, type);
 }
 
 static bool
-remove_from_type(t_page* current_page, void* ptr, uint8_t type) {
+remove_alloc(t_page* current_page, void* ptr, uint8_t type) {
 	size_t		nb_free_page;
 	t_page*		prev_page;
 	t_page*		prev_last_empty_page;
@@ -79,11 +79,35 @@ remove_from_type(t_page* current_page, void* ptr, uint8_t type) {
 }
 
 void
+remove_large_alloc(void* ptr) {
+	t_page*		prev_page;
+	t_page*		current_page;
+	t_chunk*	current_chunk;
+
+	current_page = g_malloc.map[LARGE];
+	prev_page = NULL;
+	while (current_page) {
+		current_chunk = current_page->chunk;
+		if (ptr_add(current_chunk, sizeof(t_chunk)) == ptr) {
+			if (current_page == g_malloc.map[LARGE])
+				g_malloc.map[LARGE] = current_page->next;
+			else
+				prev_page->next = current_page->next;
+			munmap(current_page, current_chunk->size + sizeof(t_page) + sizeof(t_chunk));
+			return ;
+		}
+		prev_page = current_page;
+		current_page = current_page->next;
+	}
+}
+
+void
 ft_free(void* ptr) {
 	if (!ptr)
 		return ;
-	for (uint8_t i = TINY; i <= LARGE; ++i) {
-		if (remove_from_type(g_malloc.map[i], ptr, i))
-			break ;
+	for (uint8_t i = TINY; i < LARGE; ++i) {
+		if (remove_alloc(g_malloc.map[i], ptr, i))
+			return ;
 	}
+	remove_large_alloc(ptr);
 }

@@ -6,6 +6,7 @@
 #include <linux/limits.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <sys/mman.h>
 #include <unistd.h>
 
@@ -18,9 +19,10 @@ allocate_large(size_t size) {
 	void*			new_memory;
 	t_page			page_header;
 	int const		page_size = sysconf(_SC_PAGE_SIZE);
-	int const		rest = size & (page_size - 1);
+	int const		rest = (size + sizeof(t_page) + sizeof(t_chunk)) & (page_size - 1);
 	size_t const	allocated_memory = (rest) ? size + page_size - (rest) : size;
 
+	size = allocated_memory - sizeof(t_page) + sizeof(t_chunk);
 	new_memory = mmap(NULL, allocated_memory, MALLOC_PROT_MMAP, MALLOC_FLAG_MMAP, -1, 0);
 	if (new_memory == MAP_FAILED)
 		return (new_memory);
@@ -110,19 +112,31 @@ int main(void) {
 	void* PTR = ft_malloc(7458458);
 	void* PTR2 = ft_malloc(7458434558);
 
+	(void)ptr;
+	(void)ptr2;
+	(void)PTR;
+	(void)PTR2;
 	show_alloc_mem();
 	printf("\n\n\n");
 
 	ft_free(ptr);
 	ft_free(ptr2);
+	// ft_realloc(PTR2, 10);
 	ft_free(PTR);
 	show_alloc_mem();
-
 	printf("\n\n\n");
 	ft_free(PTR2);
-
 	show_alloc_mem();
 	printf("\n\n\n");
+
+	// printf("\n\n\n");
+	// ft_realloc(PTR2, 10);
+
+	// show_alloc_mem();
+	// printf("\n\n\n");
+	// ptr = ft_malloc(10);
+	// show_alloc_mem();
+	// ft_free(ptr);
 
 	return (0);
 }
