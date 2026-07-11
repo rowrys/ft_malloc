@@ -86,12 +86,32 @@ get_crnt_chunk_free(t_chunk* current_chunk) {
 	return (current_chunk->flags & CRNT_CHUNK_FREE);
 }
 
+static inline void
+set_crnt_chunk_free(t_chunk* current_chunk, bool const state) {
+	current_chunk->flags = (state) ? current_chunk->flags | CRNT_CHUNK_FREE : current_chunk->flags & ~CRNT_CHUNK_FREE;
+}
+
 static inline bool
 check_cheksum(void const* ptr) {
 	t_chunk const*	current_chunk;
 
 	current_chunk = ptr_sub(ptr, sizeof(t_chunk));
-	return (current_chunk->flags == CHECKSUM(ptr, NUMBERS_OF_FLAGS));
+	return (CHECKSUM(current_chunk->flags, NUMBERS_OF_FLAGS)  == CHECKSUM(ptr, NUMBERS_OF_FLAGS));
+}
+
+/**
+ * @brief return aligned size
+ * 
+ * @param size the size to align
+ * @param align align to ..., WARN it must be 2^n
+ * @return size_t aligned size
+ */
+static inline size_t
+align_as(size_t size, uint16_t align) {
+	uint16_t const	rest = size & (align - 1);
+
+	size = (rest) ? size + align - rest : size;
+	return (size);
 }
 
 extern t_malloc g_malloc;
