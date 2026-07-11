@@ -1,12 +1,11 @@
 #ifndef FT_MALLOC_INTERN
 # define FT_MALLOC_INTERN
 
-#include <stdint.h>
+# include <stdbool.h>
 # include <stddef.h>
+#include <stdio.h>
 
-/* please 1 < INIT_ZONE_NB_PAGE_DEFAULT < x */
-# define INIT_ZONE_NB_PAGE_DEFAULT 5
-/* please 1 < MAX_PAGE_BEFOR_FREE < x */
+# define INIT_ZONE_NB_PAGE_DEFAULT 2
 # define MAX_PAGE_BEFOR_FREE 3
 # define N 256
 # define M 2048
@@ -17,13 +16,13 @@
 typedef unsigned char uchar;
 
 typedef struct s_page {
-	void	*chunk;
 	void	*next;
+	size_t	size;
 }	t_page;
 
 typedef struct s_chunk {
 	size_t	size;
-	void	*next;
+	size_t	flags;
 }	t_chunk;
 
 typedef struct s_malloc {
@@ -36,39 +35,25 @@ typedef enum e_memory_zone {
 	LARGE,
 } t_memory_zone;
 
+typedef enum e_chunk_flags {
+	CRNT_CHUNK_FREE,
+} t_chunk_flags;
 
 static inline void*
-ptr_add(void *p, size_t n) {
+ptr_add(void const* p, size_t const n) {
 	return (uchar*)p + n;
 }
 
-/**
- * @brief Returns the number of bytes available for allocation between two t_chunk
- * 
- * @param start_addr Address of the first chunk
- * @param end_addr Address of the second chunk
- * @return size_t Number of bytes available between the two chunks
- */
-size_t	get_free_space_between(void* current_page, t_chunk* start_addr, t_chunk* end_addr);
+static inline void*
+ptr_sub(void const* p, size_t const n) {
+	return (uchar*)p - n;
+}
 
-/**
- * @brief Initializes a tiny or small zone and adds the first chunk
- * 
- * @param zone_type The type of zone to initialize
- * @param size Size of the first chunk
- * @return void* On success, returns a pointer to the first usable address after the page header and chunk header. On failure, returns MAP_FAILED
- */
-void*	init_zone(uint8_t type, size_t size);
-
-/**
- * @brief this fonction insert a chunk at page + sizeof(t_page)
- * 
- * @param current_page witch page to insert chunk
- * @param size Size of the first data
- * @return void* Returns a pointer to the first usable address after the page header and chunk header
- */
-void*
-insert_new_chunk_after_page_header(void* current_page, size_t size);
+static inline bool
+can_check_next_chunk(t_page const* current_page, t_chunk const* current_chunk) {
+	const void* end_addrs_chunk = ptr_add(current_chunk, sizeof(t_chunk) * 2 + current_chunk->size);
+	return ((size_t)ptr_sub(end_addrs_chunk, (size_t)current_page) < current_page->size);
+}
 
 extern t_malloc g_malloc;
 
