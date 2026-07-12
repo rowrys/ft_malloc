@@ -61,7 +61,7 @@ ft_malloc(size_t size) {
 	else if (size <= M)
 		result = alloc(SMALL, size);
 	else
-		result = NULL;
+		result = alloc_large_page(size);
 	return (result);
 }
 
@@ -71,6 +71,7 @@ main(void) {
 	for (int i = 0; i <= 127; i++) {		// i <= 127 to make chunk on other page
 		ft_malloc(16);
 	}
+	ft_malloc(5445544545);
 	show_alloc_mem();
 	return (0);
 }

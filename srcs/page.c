@@ -1,8 +1,10 @@
 
 #include "ft_malloc_intern.h"
 
+#include <stddef.h>
 #include <sys/mman.h>
 #include <assert.h>
+#include <unistd.h>
 
 static void*
 alloc_one_page(void) {
@@ -19,9 +21,28 @@ alloc_one_page(void) {
 }
 
 void*
+alloc_large_page(size_t size) {
+	t_chunk*	current_chunk;
+	size_t		alloc_size;
+	void*		new_page;
+
+	new_page = mmap(NULL, align_as(size, PAGE_SIZE), MALLOC_PROT_MMAP, MALLOC_FLAG_MMAP, -1, 0);
+	if (new_page == MAP_FAILED)
+		return (NULL);
+	alloc_size = align_as(sizeof(t_page) + sizeof(t_chunk) + size, PAGE_SIZE);
+	current_chunk = ptr_add(new_page, sizeof(t_page));
+	write_page_header(new_page, NULL, alloc_size);
+	write_chunk_header(current_chunk, 0, alloc_size - sizeof(t_page) - sizeof(t_chunk));
+	if (!g_malloc.map[LARGE])
+		g_malloc.map[LARGE] = new_page;
+	else
+		g_malloc.map[LARGE]->next = new_page;
+	return (ptr_add(current_chunk, sizeof(t_chunk)));
+}
+
+void*
 make_pages(uint8_t const map_type, uint8_t nb_pages, t_page* last_page) {
 	void*	new_page;
-	// void*	first_alloc_page;
 
 	if (!nb_pages)
 		return (NULL);
