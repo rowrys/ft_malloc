@@ -2,9 +2,7 @@
 #include "ft_malloc.h"
 #include "ft_malloc_intern.h"
 
-#include <assert.h>
 #include <stdio.h>
-#include <sys/mman.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <unistd.h>
@@ -12,42 +10,12 @@
 t_malloc	g_malloc;
 
 static void*
-alloc_one_page(void) {
-	void*		new_page;
-	t_chunk*	current_chunk;
-
-	new_page = mmap(NULL, PAGE_SIZE, MALLOC_PROT_MMAP, MALLOC_FLAG_MMAP, -1, 0);
-	if (new_page == MAP_FAILED)
-		return (NULL);
-	current_chunk = ptr_add(new_page, sizeof(t_page));
-	write_page_header(new_page, NULL, PAGE_SIZE);
-	write_chunk_header(current_chunk, CRNT_CHUNK_FREE, PAGE_SIZE - sizeof(t_page) - sizeof(t_chunk));
-	return (new_page);
-}
-
-static void*
-make_pages(uint8_t const map_type, uint8_t nb_pages, t_page* last_page) {
-	void*	new_page;
-
-	if (!nb_pages)
-		return (NULL);
-	if (!last_page) {
-		assert(g_malloc.map[map_type] == NULL);			// si last_page == NULL, alors, g_malloc.map[map_type] doit etre NULL
-		new_page = alloc_one_page();
-		if (!new_page)
-			return (NULL);
-		g_malloc.map[map_type] = new_page;
-		last_page = new_page;
-		--nb_pages;
-	}
-	while (nb_pages--) {
-		new_page = alloc_one_page();
-		if (!new_page)
-			return (NULL);
-		last_page->next = new_page;
-		last_page = new_page;
-	}
-	return (g_malloc.map[map_type]);
+split_chunk(t_page* current_page, t_chunk* current_chunk, size_t size, size_t chunk_size) {
+	set_crnt_chunk_free(current_chunk, 0);
+	current_chunk->size = size;
+	if (get_free_space_after_chunk(current_page, current_chunk) > sizeof(t_chunk))
+		write_chunk_header(ptr_add(current_chunk, current_chunk->size + sizeof(t_chunk)), CRNT_CHUNK_FREE, chunk_size - sizeof(t_chunk) - size);
+	return (ptr_add(current_chunk, sizeof(t_chunk)));
 }
 
 static void*
@@ -69,20 +37,16 @@ alloc(uint8_t map_type, size_t size) {
 		do {
 			current_chunk = ptr_add(current_chunk, sizeof(t_chunk) + chunk_size);
 			chunk_size = current_chunk->size;
-			if (get_crnt_chunk_free_flag(current_chunk) && chunk_size >= size) {
-				set_crnt_chunk_free(current_chunk, 0);
-				current_chunk->size = size;
-				if (get_free_space_after_chunk(current_page, current_chunk) > sizeof(t_chunk))
-					write_chunk_header(ptr_add(current_chunk, current_chunk->size + sizeof(t_chunk)), CRNT_CHUNK_FREE, chunk_size - sizeof(t_chunk) * 2 - size);
-				return (ptr_add(current_chunk, sizeof(t_chunk)));
-			}
+			if (get_crnt_chunk_free_flag(current_chunk) && chunk_size >= size)
+				return (split_chunk(current_page, current_chunk, size, chunk_size));
 		} while (get_free_space_after_chunk(current_page, current_chunk) > sizeof(t_chunk));
 		prev_page = current_page;
 		current_page = current_page->next;
 	}
 	if (!make_pages(map_type, INIT_ZONE_NB_PAGE_DEFAULT, prev_page))
 		return (NULL);
-	return (NULL);
+	current_page = prev_page->next;
+	return (split_chunk(current_page, ptr_add(current_page, sizeof(t_page)), size, PAGE_SIZE - sizeof(t_page) - sizeof(t_chunk)));
 }
 
 void*
@@ -104,8 +68,9 @@ ft_malloc(size_t size) {
 int
 main(void) {
 	show_alloc_mem();
-	void* ptr = ft_malloc(14);
-	(void)ptr;
+	for (int i = 0; i <= 127; i++) {		// i <= 127 to make chunk on other page
+		ft_malloc(16);
+	}
 	show_alloc_mem();
 	return (0);
 }

@@ -3,7 +3,7 @@
 
 # include <stdbool.h>
 # include <stddef.h>
-#include <stdint.h>
+# include <stdint.h>
 # include <stdio.h>
 # include <unistd.h>
 
@@ -113,6 +113,8 @@ align_as(size_t size, uint16_t align) {
 	size = (rest) ? size + align - rest : size;
 	return (size);
 }
+
+void*	make_pages(uint8_t const map_type, uint8_t nb_pages, t_page* last_page);
 
 extern t_malloc g_malloc;
 

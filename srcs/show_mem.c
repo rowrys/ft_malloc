@@ -27,6 +27,7 @@ show_map(uint8_t map_type) {
 				printf("%p - %p : %lu Bytes\n", ptr_add(current_chunk, sizeof(t_chunk)), ptr_add(current_chunk, sizeof(t_chunk) + used_mem), used_mem);
 			}
 		} while (get_free_space_after_chunk(current_page, current_chunk) > sizeof(t_chunk));
+		printf("other page!\n");
 		current_page = current_page->next;
 	}
 	return (total_used_mem);

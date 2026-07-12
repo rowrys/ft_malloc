@@ -1,7 +1,8 @@
 CC := cc
 NAME := ft_malloc
 SRCS_DIR := srcs/
-SOURCES :=	ft_malloc.c			\
+SOURCES :=	ft_malloc.c	\
+			page.c		\
 			show_mem.c
 
 SOURCES	:=	$(addprefix $(SRCS_DIR), $(SOURCES))
