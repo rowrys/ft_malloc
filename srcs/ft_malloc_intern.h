@@ -63,10 +63,10 @@ ptr_sub(void const* p, size_t const n) {
 	return (uchar*)p - n;
 }
 
-static inline bool
-can_check_next_chunk(t_page const* current_page, t_chunk const* current_chunk) {
+static inline size_t
+get_free_space_after_chunk(t_page const* current_page, t_chunk const* current_chunk) {
 	const void* end_addrs_chunk = ptr_add(current_chunk, sizeof(t_chunk) + current_chunk->size);
-	return ((size_t)ptr_sub(end_addrs_chunk, (size_t)current_page) < current_page->size);
+	return (current_page->size - (size_t)ptr_sub(end_addrs_chunk, (size_t)current_page));
 }
 
 static inline void
@@ -82,7 +82,7 @@ write_chunk_header(t_chunk* chunk, size_t const flags, size_t const size) {
 }
 
 static inline bool
-get_crnt_chunk_free(t_chunk* current_chunk) {
+get_crnt_chunk_free_flag(t_chunk* current_chunk) {
 	return (current_chunk->flags & CRNT_CHUNK_FREE);
 }
 
@@ -96,7 +96,7 @@ check_cheksum(void const* ptr) {
 	t_chunk const*	current_chunk;
 
 	current_chunk = ptr_sub(ptr, sizeof(t_chunk));
-	return (CHECKSUM(current_chunk->flags, NUMBERS_OF_FLAGS)  == CHECKSUM(ptr, NUMBERS_OF_FLAGS));
+	return (CHECKSUM(current_chunk->flags, NUMBERS_OF_FLAGS) == CHECKSUM(ptr, NUMBERS_OF_FLAGS));
 }
 
 /**
