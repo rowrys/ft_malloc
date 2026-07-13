@@ -10,11 +10,11 @@
 t_malloc	g_malloc;
 
 static void*
-split_chunk(t_page* current_page, t_chunk* current_chunk, size_t size, size_t chunk_size) {
-	set_crnt_chunk_free(current_chunk, 0);
+split_chunk(t_page* current_page, t_chunk* current_chunk, size_t size, size_t chunk_size, uint8_t map_type) {
+	set_crnt_chunk_free_flag(current_chunk, 0);
 	current_chunk->size = size;
 	if (get_free_space_after_chunk(current_page, current_chunk) > sizeof(t_chunk))
-		write_chunk_header(ptr_add(current_chunk, current_chunk->size + sizeof(t_chunk)), CRNT_CHUNK_FREE, chunk_size - sizeof(t_chunk) - size);
+		write_chunk_header(ptr_add(current_chunk, current_chunk->size + sizeof(t_chunk)), MAPTYPE(map_type) | FREE(1), chunk_size - sizeof(t_chunk) - size);
 	return (ptr_add(current_chunk, sizeof(t_chunk)));
 }
 
@@ -38,7 +38,7 @@ alloc(uint8_t map_type, size_t size) {
 			current_chunk = ptr_add(current_chunk, sizeof(t_chunk) + chunk_size);
 			chunk_size = current_chunk->size;
 			if (get_crnt_chunk_free_flag(current_chunk) && chunk_size >= size)
-				return (split_chunk(current_page, current_chunk, size, chunk_size));
+				return (split_chunk(current_page, current_chunk, size, chunk_size, map_type));
 		} while (get_free_space_after_chunk(current_page, current_chunk) > sizeof(t_chunk));
 		prev_page = current_page;
 		current_page = current_page->next;
@@ -46,7 +46,7 @@ alloc(uint8_t map_type, size_t size) {
 	if (!make_pages(map_type, INIT_ZONE_NB_PAGE_DEFAULT, prev_page))
 		return (NULL);
 	current_page = prev_page->next;
-	return (split_chunk(current_page, ptr_add(current_page, sizeof(t_page)), size, PAGE_SIZE - sizeof(t_page) - sizeof(t_chunk)));
+	return (split_chunk(current_page, ptr_add(current_page, sizeof(t_page)), size, PAGE_SIZE - sizeof(t_page) - sizeof(t_chunk), map_type));
 }
 
 void*

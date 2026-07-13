@@ -59,10 +59,10 @@ ft_free(void* ptr) {
 		return ;
 	}
 	page = get_page_from_chunk(chunk);
-	if (chunk->size > M) {
+	if (get_map_type_flag(chunk) == LARGE) {
 		free_large(page);
 		return ;
 	}
-	set_crnt_chunk_free(chunk, 1);
+	set_crnt_chunk_free_flag(chunk, 1);
 	merge_free_chunk(page, chunk);
 }

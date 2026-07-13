@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 static void*
-alloc_one_page(void) {
+alloc_one_page(uint8_t map_type) {
 	void*		new_page;
 	t_chunk*	current_chunk;
 
@@ -17,7 +17,7 @@ alloc_one_page(void) {
 		return (NULL);
 	current_chunk = ptr_add(new_page, sizeof(t_page));
 	write_page_header(new_page, NULL, PAGE_SIZE);
-	write_chunk_header(current_chunk, CRNT_CHUNK_FREE, PAGE_SIZE - sizeof(t_page) - sizeof(t_chunk));
+	write_chunk_header(current_chunk,  MAPTYPE(map_type) | FREE(1), PAGE_SIZE - sizeof(t_page) - sizeof(t_chunk));
 	return (new_page);
 }
 
@@ -33,7 +33,7 @@ alloc_large_page(size_t size) {
 		return (NULL);
 	current_chunk = ptr_add(new_page, sizeof(t_page));
 	write_page_header(new_page, NULL, alloc_size);
-	write_chunk_header(current_chunk, 0, alloc_size - sizeof(t_page) - sizeof(t_chunk));
+	write_chunk_header(current_chunk, MAPTYPE(LARGE), alloc_size - sizeof(t_page) - sizeof(t_chunk));
 	if (!g_malloc.map[LARGE])
 		g_malloc.map[LARGE] = new_page;
 	else
@@ -49,7 +49,7 @@ make_pages(uint8_t const map_type, uint8_t nb_pages, t_page* last_page) {
 		return (NULL);
 	if (!last_page) {
 		assert(g_malloc.map[map_type] == NULL);			// si last_page == NULL, alors, g_malloc.map[map_type] doit etre NULL
-		new_page = alloc_one_page();
+		new_page = alloc_one_page(map_type);
 		if (!new_page)
 			return (NULL);
 		g_malloc.map[map_type] = new_page;
@@ -57,7 +57,7 @@ make_pages(uint8_t const map_type, uint8_t nb_pages, t_page* last_page) {
 		--nb_pages;
 	}
 	while (nb_pages--) {
-		new_page = alloc_one_page();
+		new_page = alloc_one_page(map_type);
 		if (!new_page)
 			return (NULL);
 		last_page->next = new_page;
