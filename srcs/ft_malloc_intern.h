@@ -9,7 +9,7 @@
 # include <unistd.h>
 
 # define INIT_ZONE_NB_PAGE_DEFAULT 2
-# define MAX_PAGE_BEFOR_FREE 3
+# define MAX_PAGE_BEFOR_FREE 2
 # define N 256
 # define M 2048
 
@@ -32,6 +32,7 @@ typedef struct s_chunk {
 
 typedef struct s_malloc {
 	t_page*	map[3];
+	size_t	total_alloc;
 }	t_malloc;
 
 typedef enum e_memory_zone {
@@ -150,6 +151,7 @@ align_as(size_t size, uint16_t align) {
 
 void*	make_pages(uint8_t const map_type, uint8_t nb_pages, t_page* last_page);
 void*	alloc_large_page(size_t size);
+void	free_all_page(void);
 
 extern t_malloc g_malloc;
 

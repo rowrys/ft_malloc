@@ -63,6 +63,7 @@ ft_malloc(size_t size) {
 		result = alloc(SMALL, align_size);
 	else
 		result = alloc_large_page(align_size);
+	g_malloc.total_alloc = (result) ? g_malloc.total_alloc + 1 : g_malloc.total_alloc;
 	return (result);
 }
 
