@@ -100,6 +100,17 @@ check_cheksum(void const* ptr) {
 }
 
 /**
+ * @brief Get the page from t_chunk, WARN this func return the start of the page!
+ * 
+ * @param chunk reference point to find the page.
+ * @return void* addrs of t_page
+ */
+static inline void*
+get_page_from_chunk(t_chunk* chunk) {
+	return (ptr_sub(chunk, (size_t)chunk & (PAGE_SIZE - 1)));
+}
+
+/**
  * @brief return aligned size
  * 
  * @param size the size to align

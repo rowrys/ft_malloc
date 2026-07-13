@@ -2,6 +2,7 @@ CC := cc
 NAME := ft_malloc
 SRCS_DIR := srcs/
 SOURCES :=	ft_malloc.c	\
+			ft_free.c	\
 			page.c		\
 			show_mem.c
 

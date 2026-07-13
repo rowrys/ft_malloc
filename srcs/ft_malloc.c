@@ -52,26 +52,34 @@ alloc(uint8_t map_type, size_t size) {
 void*
 ft_malloc(size_t size) {
 	void*	result;
+	size_t	align_size;
 
-	if (!size)
+	align_size = align_as(size, _Alignof(void*));
+	if (!size || align_size < size)
 		return (NULL);
-	size = align_as(size, _Alignof(void*));
-	if (size <= N)
-		result = alloc(TINY, size);
-	else if (size <= M)
-		result = alloc(SMALL, size);
+	if (align_size <= N)
+		result = alloc(TINY, align_size);
+	else if (align_size <= M)
+		result = alloc(SMALL, align_size);
 	else
-		result = alloc_large_page(size);
+		result = alloc_large_page(align_size);
 	return (result);
 }
 
 int
 main(void) {
+	// show_alloc_mem();
+	// for (int i = 0; i <= 127; i++) {		// i <= 127 to make chunk on other page
+	// 	ft_malloc(16);
+	// }
+	// ft_malloc(5445544545);
+	// void* ptr = ft_malloc(4096 * 4096 * 64);
+	void* ptr = ft_malloc(64);
+	if (!ptr)
+		return (1);
 	show_alloc_mem();
-	for (int i = 0; i <= 127; i++) {		// i <= 127 to make chunk on other page
-		ft_malloc(16);
-	}
-	ft_malloc(5445544545);
+	ft_free((void*)((size_t)ptr + 0));
+	// ft_free((void*)((size_t)ptr + 0));
 	show_alloc_mem();
 	return (0);
 }
