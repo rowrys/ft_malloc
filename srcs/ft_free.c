@@ -3,22 +3,41 @@
 #include "ft_malloc_intern.h"
 
 #include <signal.h>
+#include <stddef.h>
 #include <sys/mman.h>
 
 static void
 free_large(t_page* page) {
 	t_page*	current_page;
+	t_page*	prev_page;
 
+	prev_page = NULL;
 	current_page = g_malloc.map[LARGE];
 	while (current_page) {
 		if (current_page == page) {
-			munmap(page, page->size);		
+			if (!prev_page)
+				g_malloc.map[LARGE] = current_page->next;
+			else
+				prev_page->next = current_page->next;
+			munmap(page, page->size);
 			return ;
 		}
+		prev_page = current_page;
 		current_page = current_page->next;
 	}
 	write(2, "ft_free(): invalid pointer\n", 27);
 	kill(0, SIGABRT);
+}
+
+static void
+merge_free_chunk(t_page* page, t_chunk* chunk) {
+	t_chunk*	next_chunk;
+
+	if (!(get_free_space_after_chunk(page, chunk) > sizeof(t_chunk)))
+		return ;
+	next_chunk = ptr_add(chunk, sizeof(t_chunk) + chunk->size);
+	if (get_crnt_chunk_free_flag(next_chunk))
+		chunk->size += sizeof(t_chunk) + next_chunk->size;
 }
 
 void
@@ -35,7 +54,7 @@ ft_free(void* ptr) {
 	}
 	chunk = ptr_sub(ptr, sizeof(t_chunk));
 	if (get_crnt_chunk_free_flag(chunk)) {
-		write(2, "free(): double free detected\n", 29);
+		write(2, "ft_free(): double free detected\n", 32);
 		kill(0, SIGABRT);
 		return ;
 	}
@@ -45,5 +64,5 @@ ft_free(void* ptr) {
 		return ;
 	}
 	set_crnt_chunk_free(chunk, 1);
-	// regarder si le prochain chunk est vide, si oui merge les deux chunk
+	merge_free_chunk(page, chunk);
 }

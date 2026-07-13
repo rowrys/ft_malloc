@@ -2,6 +2,7 @@
 #include "ft_malloc_intern.h"
 
 #include <stddef.h>
+#include <stdint.h>
 #include <sys/mman.h>
 #include <assert.h>
 #include <unistd.h>
@@ -26,10 +27,10 @@ alloc_large_page(size_t size) {
 	size_t		alloc_size;
 	void*		new_page;
 
-	new_page = mmap(NULL, align_as(size, PAGE_SIZE), MALLOC_PROT_MMAP, MALLOC_FLAG_MMAP, -1, 0);
+	alloc_size = align_as(sizeof(t_page) + sizeof(t_chunk) + size, PAGE_SIZE);
+	new_page = mmap(NULL, alloc_size, MALLOC_PROT_MMAP, MALLOC_FLAG_MMAP, -1, 0);
 	if (new_page == MAP_FAILED)
 		return (NULL);
-	alloc_size = align_as(sizeof(t_page) + sizeof(t_chunk) + size, PAGE_SIZE);
 	current_chunk = ptr_add(new_page, sizeof(t_page));
 	write_page_header(new_page, NULL, alloc_size);
 	write_chunk_header(current_chunk, 0, alloc_size - sizeof(t_page) - sizeof(t_chunk));

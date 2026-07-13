@@ -31,7 +31,7 @@ typedef struct s_chunk {
 }	t_chunk;
 
 typedef struct s_malloc {
-	t_page	*map[3];
+	t_page*	map[3];
 }	t_malloc;
 
 typedef enum e_memory_zone {
