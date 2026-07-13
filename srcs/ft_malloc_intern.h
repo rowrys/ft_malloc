@@ -96,7 +96,7 @@ check_cheksum(void const* ptr) {
 	t_chunk const*	current_chunk;
 
 	current_chunk = ptr_sub(ptr, sizeof(t_chunk));
-	return (CHECKSUM(current_chunk->flags, NUMBERS_OF_FLAGS) == CHECKSUM(ptr, NUMBERS_OF_FLAGS));
+	return (CHECKSUM(current_chunk->flags, NUMBERS_OF_FLAGS) == CHECKSUM(current_chunk, NUMBERS_OF_FLAGS));
 }
 
 /**
