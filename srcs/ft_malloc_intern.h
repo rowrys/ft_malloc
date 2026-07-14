@@ -1,6 +1,7 @@
 #ifndef FT_MALLOC_INTERN
 # define FT_MALLOC_INTERN
 
+#include <assert.h>
 # include <stdbool.h>
 # include <stddef.h>
 # include <stdint.h>
@@ -8,11 +9,10 @@
 # include <unistd.h>
 
 # define INIT_ZONE_NB_PAGE_DEFAULT 2
-# define MAX_PAGE_BEFOR_FREE 3
+# define MAX_PAGE_BEFOR_FREE 2
 # define N 256
 # define M 2048
 
-# define CHECKSUM(ptr, NB_FLAGS) (((size_t)ptr >> NB_FLAGS) << NB_FLAGS)
 # define PAGE_SIZE sysconf(_SC_PAGE_SIZE)
 
 # define MALLOC_PROT_MMAP PROT_READ | PROT_WRITE
@@ -31,7 +31,8 @@ typedef struct s_chunk {
 }	t_chunk;
 
 typedef struct s_malloc {
-	t_page	*map[3];
+	t_page*	map[3];
+	size_t	total_alloc;
 }	t_malloc;
 
 typedef enum e_memory_zone {
@@ -40,7 +41,16 @@ typedef enum e_memory_zone {
 	LARGE,
 } t_memory_zone;
 
-# define NUMBERS_OF_FLAGS 1 /* counted manually, keep these in sync with t_chunk_flags, dont count END_FLAGS IT NOT A FLAG*/
+// on the next define counted manually, keep these in sync with t_chunk_flags.
+# define CRNT_CHUNK_FREE_POS 1
+# define MAP_TYPE_ONE_POS 2
+# define MAP_TYPE_TWO_POS 3
+# define NUMBERS_OF_FLAGS 3 		// dont count END_FLAGS IT NOT A FLAG
+# define FLAGS_MASK_MAP_TYPE 6		// take the bits representation of MAP_TYPE_ONE and MAP_TYPE_TWO
+
+# define CHECKSUM(ptr, NB_FLAGS) (((size_t)ptr >> NB_FLAGS) << NB_FLAGS)
+# define MAPTYPE(map_type) ((map_type << (MAP_TYPE_ONE_POS - 1)) & FLAGS_MASK_MAP_TYPE)
+# define FREE(state) (state & CRNT_CHUNK_FREE)
 
 /**
  * @brief this enum contains flags chunk.
@@ -50,8 +60,11 @@ typedef enum e_memory_zone {
  */
 typedef enum e_chunk_flags {
 	CRNT_CHUNK_FREE = 1,
-	END_FLAGS = 2
+	MAP_TYPE_ONE = 2,
+	MAP_TYPE_TWO = 4,
+	END_FLAGS = 8
 } t_chunk_flags;
+
 
 static inline void*
 ptr_add(void const* p, size_t const n) {
@@ -87,8 +100,19 @@ get_crnt_chunk_free_flag(t_chunk* current_chunk) {
 }
 
 static inline void
-set_crnt_chunk_free(t_chunk* current_chunk, bool const state) {
+set_crnt_chunk_free_flag(t_chunk* current_chunk, bool const state) {
 	current_chunk->flags = (state) ? current_chunk->flags | CRNT_CHUNK_FREE : current_chunk->flags & ~CRNT_CHUNK_FREE;
+}
+
+static inline uint8_t
+get_map_type_flag(t_chunk* chunk) {
+	return ((chunk->flags & FLAGS_MASK_MAP_TYPE) >> (MAP_TYPE_ONE_POS - 1));
+}
+
+static inline void
+set_map_type_flag(t_chunk* chunk, uint8_t map_type) {
+	chunk->flags = chunk->flags & ~(size_t)FLAGS_MASK_MAP_TYPE;
+	chunk->flags |= (map_type & FLAGS_MASK_MAP_TYPE);
 }
 
 static inline bool
@@ -96,7 +120,18 @@ check_cheksum(void const* ptr) {
 	t_chunk const*	current_chunk;
 
 	current_chunk = ptr_sub(ptr, sizeof(t_chunk));
-	return (CHECKSUM(current_chunk->flags, NUMBERS_OF_FLAGS) == CHECKSUM(ptr, NUMBERS_OF_FLAGS));
+	return (CHECKSUM(current_chunk->flags, NUMBERS_OF_FLAGS) == CHECKSUM(current_chunk, NUMBERS_OF_FLAGS));
+}
+
+/**
+ * @brief Get the page from t_chunk, WARN this func return the start of the page!
+ * 
+ * @param chunk reference point to find the page.
+ * @return void* addrs of t_page
+ */
+static inline void*
+get_page_from_chunk(t_chunk* chunk) {
+	return (ptr_sub(chunk, (size_t)chunk & (PAGE_SIZE - 1)));
 }
 
 /**
@@ -116,6 +151,7 @@ align_as(size_t size, uint16_t align) {
 
 void*	make_pages(uint8_t const map_type, uint8_t nb_pages, t_page* last_page);
 void*	alloc_large_page(size_t size);
+void	free_all_page(void);
 
 extern t_malloc g_malloc;
 
