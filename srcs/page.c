@@ -7,20 +7,6 @@
 #include <assert.h>
 #include <unistd.h>
 
-static void*
-alloc_one_page(uint8_t map_type) {
-	void*		new_page;
-	t_chunk*	current_chunk;
-
-	new_page = mmap(NULL, PAGE_SIZE, MALLOC_PROT_MMAP, MALLOC_FLAG_MMAP, -1, 0);
-	if (new_page == MAP_FAILED)
-		return (NULL);
-	current_chunk = ptr_add(new_page, sizeof(t_page));
-	write_page_header(new_page, NULL, PAGE_SIZE);
-	write_chunk_header(current_chunk,  MAPTYPE(map_type) | FREE(1), PAGE_SIZE - sizeof(t_page) - sizeof(t_chunk));
-	return (new_page);
-}
-
 static void
 free_page_from_map(uint8_t map_type) {
 	t_page*	current_page;
@@ -42,26 +28,20 @@ free_all_page(void) {
 }
 
 void*
-make_pages(uint8_t const map_type, uint8_t nb_pages, t_page* last_page) {
-	void*	new_page;
+make_pages(uint8_t map_type, uint8_t nb_pages, t_page* last_page) {
+	void*			new_page;
+	size_t	const	alloc_size = PAGE_SIZE * nb_pages;
 
 	if (!nb_pages)
 		return (NULL);
-	if (!last_page) {
-		assert(g_malloc.map[map_type] == NULL);			// si last_page == NULL, alors, g_malloc.map[map_type] doit etre NULL
-		new_page = alloc_one_page(map_type);
-		if (!new_page)
-			return (NULL);
+	new_page = mmap(NULL, alloc_size, MALLOC_PROT_MMAP, MALLOC_FLAG_MMAP, -1, 0);
+	if (new_page == MAP_FAILED)
+		return (NULL);
+	write_page_header(new_page, NULL, alloc_size);
+	write_chunk_header(ptr_add(new_page, sizeof(t_page)), MAPTYPE(map_type) | FREE(1), alloc_size - sizeof(t_page) - sizeof(t_chunk));
+	if (!last_page)
 		g_malloc.map[map_type] = new_page;
-		last_page = new_page;
-		--nb_pages;
-	}
-	while (nb_pages--) {
-		new_page = alloc_one_page(map_type);
-		if (!new_page)
-			return (NULL);
+	else
 		last_page->next = new_page;
-		last_page = new_page;
-	}
 	return (g_malloc.map[map_type]);
 }
