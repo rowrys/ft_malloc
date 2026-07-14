@@ -8,7 +8,6 @@
 # include <stdio.h>
 # include <unistd.h>
 
-# define INIT_ZONE_NB_PAGE_DEFAULT 2
 # define MAX_PAGE_BEFOR_FREE 2
 # define max_tiny 256
 # define max_small 1024

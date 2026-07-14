@@ -4,7 +4,7 @@ SRCS_DIR := srcs/
 SOURCES :=	ft_malloc.c	\
 			page.c		\
 			show_mem.c	\
-# 			ft_free.c	\
+			ft_free.c	\
 
 
 SOURCES	:=	$(addprefix $(SRCS_DIR), $(SOURCES))

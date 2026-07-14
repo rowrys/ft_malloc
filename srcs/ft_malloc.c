@@ -113,6 +113,25 @@ main(void) {
     void* q = ft_malloc(128*max_small);
 	if (!a || !b || !c || !d || !e || !f || !g || !h || !i || !j || !m || !n || !o || !l || !k || !p || !q)
 		return (1);
-    show_alloc_mem(); 
+    show_alloc_mem();
+	ft_free(a);
+	ft_free(b);
+	ft_free(c);
+	ft_free(d);
+	ft_free(e);
+	ft_free(f);
+	ft_free(g);
+	ft_free(h);
+	ft_free(i);
+	ft_free(j);
+	ft_free(k);
+	ft_free(l);
+	ft_free(m);
+	ft_free(n);
+	ft_free(o);
+	ft_free(p);
+	ft_free(q);
+	printf("\n\n\n\n\n");
+    show_alloc_mem();
 	return (0);
 }
