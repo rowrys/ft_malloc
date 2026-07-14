@@ -21,26 +21,6 @@ alloc_one_page(uint8_t map_type) {
 	return (new_page);
 }
 
-void*
-alloc_large_page(size_t size) {
-	t_chunk*	current_chunk;
-	size_t		alloc_size;
-	void*		new_page;
-
-	alloc_size = align_as(sizeof(t_page) + sizeof(t_chunk) + size, PAGE_SIZE);
-	new_page = mmap(NULL, alloc_size, MALLOC_PROT_MMAP, MALLOC_FLAG_MMAP, -1, 0);
-	if (new_page == MAP_FAILED)
-		return (NULL);
-	current_chunk = ptr_add(new_page, sizeof(t_page));
-	write_page_header(new_page, NULL, alloc_size);
-	write_chunk_header(current_chunk, MAPTYPE(LARGE), alloc_size - sizeof(t_page) - sizeof(t_chunk));
-	if (!g_malloc.map[LARGE])
-		g_malloc.map[LARGE] = new_page;
-	else
-		g_malloc.map[LARGE]->next = new_page;
-	return (ptr_add(current_chunk, sizeof(t_chunk)));
-}
-
 static void
 free_page_from_map(uint8_t map_type) {
 	t_page*	current_page;
