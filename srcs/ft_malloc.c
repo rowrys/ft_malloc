@@ -11,7 +11,9 @@
 t_malloc	g_malloc;
 
 static void*
-split_chunk(t_page* current_page, t_chunk* current_chunk, size_t size, size_t chunk_size, uint8_t map_type) {
+split_chunk(t_page* current_page, t_chunk* current_chunk, size_t size, uint8_t map_type) {
+	size_t const chunk_size = current_chunk->size;
+
 	set_crnt_chunk_free_flag(current_chunk, 0);
 	current_chunk->size = size;
 	if (get_free_space_after_chunk(current_page, current_chunk) > sizeof(t_chunk))
@@ -42,7 +44,7 @@ alloc_large(size_t size) {
 }
 
 static void*
-alloc(uint8_t map_type, size_t size) {
+alloc(uint8_t map_type, uint8_t nb_page, size_t size) {
 	t_page*		prev_page;
 	t_page*		current_page;
 	t_chunk*	current_chunk;
@@ -51,7 +53,7 @@ alloc(uint8_t map_type, size_t size) {
 	prev_page = NULL;
 	current_page = g_malloc.map[map_type];
 	if (!current_page)
-		current_page = make_pages(map_type, INIT_ZONE_NB_PAGE_DEFAULT, NULL);
+		current_page = make_pages(map_type, nb_page, NULL);
 	if (!current_page)
 		return (NULL);
 	while (current_page) {
@@ -61,15 +63,15 @@ alloc(uint8_t map_type, size_t size) {
 			current_chunk = ptr_add(current_chunk, sizeof(t_chunk) + chunk_size);
 			chunk_size = current_chunk->size;
 			if (get_crnt_chunk_free_flag(current_chunk) && chunk_size >= size)
-				return (split_chunk(current_page, current_chunk, size, chunk_size, map_type));
+				return (split_chunk(current_page, current_chunk, size, map_type));
 		} while (get_free_space_after_chunk(current_page, current_chunk) > sizeof(t_chunk));
 		prev_page = current_page;
 		current_page = current_page->next;
 	}
-	if (!make_pages(map_type, INIT_ZONE_NB_PAGE_DEFAULT, prev_page))
+	if (!make_pages(map_type, nb_page, prev_page))
 		return (NULL);
 	current_page = prev_page->next;
-	return (split_chunk(current_page, ptr_add(current_page, sizeof(t_page)), size, PAGE_SIZE - sizeof(t_page) - sizeof(t_chunk), map_type));
+	return (split_chunk(current_page, ptr_add(current_page, sizeof(t_page)), size, map_type));
 }
 
 void*
@@ -80,10 +82,10 @@ ft_malloc(size_t size) {
 	align_size = align_as(size, _Alignof(void*));
 	if (!size || align_size < size)
 		return (NULL);
-	if (align_size <= N)
-		result = alloc(TINY, align_size);
-	else if (align_size <= M)
-		result = alloc(SMALL, align_size);
+	if (align_size <= max_tiny)
+		result = alloc(TINY, N, align_size);
+	else if (align_size <= max_small)
+		result = alloc(SMALL, M, align_size);
 	else
 		result = alloc_large(align_size);
 	g_malloc.total_alloc = (result) ? g_malloc.total_alloc + 1 : g_malloc.total_alloc;
@@ -93,7 +95,7 @@ ft_malloc(size_t size) {
 int
 main(void) {
     void* a = ft_malloc(1);
-    void* b = ft_malloc(2);
+	void* b = ft_malloc(2);
     void* c = ft_malloc(4);
     void* d = ft_malloc(8);
     void* e = ft_malloc(16);
@@ -106,9 +108,9 @@ main(void) {
     void* l = ft_malloc(1024 * 2);
     void* m = ft_malloc(1024 * 4); 
     void* n = ft_malloc(1024 * 32);
-    void* o = ft_malloc(M);
-    void* p = ft_malloc(16*M);
-    void* q = ft_malloc(128*M);
+    void* o = ft_malloc(max_small);
+    void* p = ft_malloc(16*max_small);
+    void* q = ft_malloc(128*max_small);
 	if (!a || !b || !c || !d || !e || !f || !g || !h || !i || !j || !m || !n || !o || !l || !k || !p || !q)
 		return (1);
     show_alloc_mem(); 

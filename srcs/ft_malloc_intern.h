@@ -10,8 +10,10 @@
 
 # define INIT_ZONE_NB_PAGE_DEFAULT 2
 # define MAX_PAGE_BEFOR_FREE 2
-# define N 256
-# define M 2048
+# define max_tiny 256
+# define max_small 1024
+# define N 7
+# define M 26
 
 # define PAGE_SIZE sysconf(_SC_PAGE_SIZE)
 
@@ -123,16 +125,16 @@ check_cheksum(void const* ptr) {
 	return (CHECKSUM(current_chunk->flags, NUMBERS_OF_FLAGS) == CHECKSUM(current_chunk, NUMBERS_OF_FLAGS));
 }
 
-/**
- * @brief Get the page from t_chunk, WARN this func return the start of the page!
- * 
- * @param chunk reference point to find the page.
- * @return void* addrs of t_page
- */
-static inline void*
-get_page_from_chunk(t_chunk* chunk) {
-	return (ptr_sub(chunk, (size_t)chunk & (PAGE_SIZE - 1)));
-}
+// /**
+//  * @brief Get the page from t_chunk, WARN this func return the start of the page!
+//  * 
+//  * @param chunk reference point to find the page.
+//  * @return void* addrs of t_page
+//  */
+// static inline void*
+// get_page_from_chunk(t_chunk* chunk) {
+// 	return (ptr_sub(chunk, (size_t)chunk & (PAGE_SIZE - 1)));
+// }
 
 /**
  * @brief return aligned size
