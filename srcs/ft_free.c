@@ -1,11 +1,8 @@
 
-#include "ft_malloc.h"
 #include "ft_malloc_intern.h"
 
-#include <signal.h>
-#include <stddef.h>
-#include <stdint.h>
 #include <sys/mman.h>
+#include <stdio.h>
 
 static void
 free_large(t_page* page) {
@@ -27,8 +24,7 @@ free_large(t_page* page) {
 		prev_page = current_page;
 		current_page = current_page->next;
 	}
-	write(2, "ft_free(): invalid pointer\n", 27);
-	kill(0, SIGABRT);
+	panic(STDERR_FILENO, "ft_free(): invalid pointer\n");
 }
 
 static void
@@ -68,32 +64,36 @@ check_for_munmap(uint8_t map_type) {
 	}
 }
 
+static bool
+check_pointeur(void* ptr, t_page** page, t_chunk** chunk) {
+	if (!ptr)
+		return (1);
+	if (!check_cheksum(ptr)) {
+		panic(STDERR_FILENO, "ft_free(): invalid pointer\n");
+		return (1);
+	}
+	*chunk = ptr_sub(ptr, sizeof(t_chunk));
+	if (get_crnt_chunk_free_flag(*chunk)) {
+		panic(STDERR_FILENO, "ft_free(): double free detected\n");
+		return (1);
+	}
+	*page = get_page_from_chunk(*chunk, get_map_type_flag(*chunk));
+	if (!*page) {
+		panic(STDERR_FILENO, "ERROR: internal error\n");
+		return (1);
+	}
+	return (0);
+}
+
 void
 ft_free(void* ptr) {
 	t_chunk*	chunk;
 	t_page*		page;
 	uint8_t		map_type;
 
-	if (!ptr)
+	if (check_pointeur(ptr, &page, &chunk))
 		return ;
-	if (!check_cheksum(ptr)) {
-		write(2, "ft_free(): invalid pointer\n", 27);
-		kill(0, SIGABRT);
-		return ;
-	}
-	chunk = ptr_sub(ptr, sizeof(t_chunk));
-	if (get_crnt_chunk_free_flag(chunk)) {
-		write(2, "ft_free(): double free detected\n", 32);
-		kill(0, SIGABRT);
-		return ;
-	}
 	map_type = get_map_type_flag(chunk);
-	page = get_page_from_chunk(chunk, map_type);
-	if (!page) {
-		write(2, "ERROR: internal error\n", 22);
-		kill(0, SIGABRT);
-		return ;
-	}
 	if (map_type == LARGE) {
 		free_large(page);
 		if (!g_malloc.total_alloc)

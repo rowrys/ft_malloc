@@ -3,9 +3,6 @@
 #include "ft_malloc_intern.h"
 
 #include <stdio.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <unistd.h>
 #include <sys/mman.h>
 
 t_malloc	g_malloc;

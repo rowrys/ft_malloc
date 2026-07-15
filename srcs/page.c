@@ -1,11 +1,7 @@
 
 #include "ft_malloc_intern.h"
 
-#include <stddef.h>
-#include <stdint.h>
 #include <sys/mman.h>
-#include <assert.h>
-#include <unistd.h>
 
 static void
 free_page_from_map(uint8_t map_type) {

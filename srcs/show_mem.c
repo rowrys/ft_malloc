@@ -1,8 +1,6 @@
 
 #include "ft_malloc_intern.h"
 
-#include <stddef.h>
-#include <stdint.h>
 #include <stdio.h>
 
 static size_t

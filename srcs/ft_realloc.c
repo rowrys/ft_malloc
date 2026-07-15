@@ -2,12 +2,6 @@
 #include "ft_malloc.h"
 #include "ft_malloc_intern.h"
 
-#include <signal.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <string.h>
-#include <unistd.h>
-
 static void*
 try_reduce(t_chunk* chunk, size_t size) {
 	size_t const	chunk_size = chunk->size;
@@ -71,8 +65,7 @@ ft_realloc(void* ptr, size_t size) {
 	}
 	chunk = ptr_sub(ptr, sizeof(t_chunk));
 	if (!check_cheksum(ptr) || get_crnt_chunk_free_flag(chunk)) {
-		write(2, "ft_realloc(): invalid pointer\n", 30);
-		kill(0, SIGABRT);
+		panic(STDERR_FILENO, "ft_realloc(): invalid pointer\n");
 		return (NULL);
 	}
 	size = align_as(size, _Alignof(void*));
