@@ -151,6 +151,7 @@ align_as(size_t size, uint16_t align) {
 }
 
 void*	make_pages(uint8_t const map_type, uint8_t nb_pages, t_page* last_page);
+t_page*	get_page_from_chunk(t_chunk* chunk, uint8_t map_type);
 void*	alloc_large_page(size_t size);
 void	free_all_page(void);
 

@@ -17,7 +17,7 @@ split_chunk(t_page* current_page, t_chunk* current_chunk, size_t size, uint8_t m
 	set_crnt_chunk_free_flag(current_chunk, 0);
 	current_chunk->size = size;
 	if (get_free_space_after_chunk(current_page, current_chunk) > sizeof(t_chunk))
-		write_chunk_header(ptr_add(current_chunk, current_chunk->size + sizeof(t_chunk)), MAPTYPE(map_type) | FREE(1), chunk_size - sizeof(t_chunk) - size);
+		write_chunk_header(ptr_add(current_chunk, size + sizeof(t_chunk)), MAPTYPE(map_type) | FREE(1), chunk_size - sizeof(t_chunk) - size);
 	return (ptr_add(current_chunk, sizeof(t_chunk)));
 }
 
@@ -94,44 +94,55 @@ ft_malloc(size_t size) {
 
 int
 main(void) {
-    void* a = ft_malloc(1);
-	void* b = ft_malloc(2);
-    void* c = ft_malloc(4);
-    void* d = ft_malloc(8);
-    void* e = ft_malloc(16);
-    void* f = ft_malloc(32);
-    void* g = ft_malloc(64);
-    void* h = ft_malloc(128);
-    void* i = ft_malloc(256);
-    void* j = ft_malloc(512);
-    void* k = ft_malloc(1024);
-    void* l = ft_malloc(1024 * 2);
-    void* m = ft_malloc(1024 * 4); 
-    void* n = ft_malloc(1024 * 32);
-    void* o = ft_malloc(max_small);
-    void* p = ft_malloc(16*max_small);
-    void* q = ft_malloc(128*max_small);
-	if (!a || !b || !c || !d || !e || !f || !g || !h || !i || !j || !m || !n || !o || !l || !k || !p || !q)
-		return (1);
-    show_alloc_mem();
-	ft_free(a);
-	ft_free(b);
-	ft_free(c);
-	ft_free(d);
-	ft_free(e);
-	ft_free(f);
-	ft_free(g);
-	ft_free(h);
-	ft_free(i);
-	ft_free(j);
-	ft_free(k);
-	ft_free(l);
-	ft_free(m);
-	ft_free(n);
-	ft_free(o);
-	ft_free(p);
-	ft_free(q);
-	printf("\n\n\n\n\n");
-    show_alloc_mem();
+    // void* a = ft_malloc(1);
+	// void* b = ft_malloc(2);
+    // void* c = ft_malloc(4);
+    // void* d = ft_malloc(8);
+    // void* e = ft_malloc(16);
+    // void* f = ft_malloc(32);
+    // void* g = ft_malloc(64);
+    // void* h = ft_malloc(128);
+    // void* i = ft_malloc(256);
+    // void* j = ft_malloc(512);
+    // void* k = ft_malloc(1024);
+    // void* l = ft_malloc(1024 * 2);
+    // void* m = ft_malloc(1024 * 4); 
+    // void* n = ft_malloc(1024 * 32);
+    // void* o = ft_malloc(max_small);
+    // void* p = ft_malloc(16*max_small);
+    // void* q = ft_malloc(128*max_small);
+	// if (!a || !b || !c || !d || !e || !f || !g || !h || !i || !j || !m || !n || !o || !l || !k || !p || !q)
+	// 	return (1);
+    // show_alloc_mem();
+	// ft_free(a);
+	// ft_free(b);
+	// ft_free(c);
+	// ft_free(d);
+	// ft_free(e);
+	// ft_free(f);
+	// ft_free(g);
+	// ft_free(h);
+	// ft_free(i);
+	// ft_free(j);
+	// ft_free(k);
+	// ft_free(l);
+	// ft_free(m);
+	// ft_free(n);
+	// ft_free(o);
+	// ft_free(p);
+	// ft_free(q);
+	// printf("\n\n\n\n\n");
+    // show_alloc_mem();
+	{
+		char *addr;
+
+		addr = ft_malloc(16);
+		ft_free(NULL);
+		ft_free((void *)((size_t)addr + 5));
+		if (ft_realloc((void *)((size_t)addr + 5), 10) == NULL)
+			printf("Bonjours\n");
+		ft_free(addr);
+	}
+
 	return (0);
 }

@@ -68,19 +68,6 @@ check_for_munmap(uint8_t map_type) {
 	}
 }
 
-static t_page*
-get_page_from_chunk(t_chunk* chunk, uint8_t map_type) {
-	t_page*	current_page;
-
-	current_page = g_malloc.map[map_type];
-	while (current_page) {
-		if ((size_t)current_page < (size_t)chunk && (size_t)ptr_sub(chunk, (size_t)current_page) < current_page->size)
-			return (current_page);
-		current_page = current_page->next;
-	}
-	return (NULL);
-}
-
 void
 ft_free(void* ptr) {
 	t_chunk*	chunk;
