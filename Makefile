@@ -1,10 +1,12 @@
 CC := cc
 NAME := ft_malloc
+# NAME := libft_malloc_x86_64_Linux.so
 SRCS_DIR := srcs/
 SOURCES :=	ft_malloc.c	\
 			page.c		\
 			show_mem.c	\
 			ft_free.c	\
+			ft_realloc.c\
 
 
 SOURCES	:=	$(addprefix $(SRCS_DIR), $(SOURCES))
@@ -23,6 +25,7 @@ all: $(NAME)
 $(NAME): $(OBJS)
 # 	$(MAKE) --no-print-directory -C libft/
 	$(CC) $(OBJS) $(CFLAGS) $(INCLUDE) $(LIB) -o $(NAME)
+# 	ar rcs $@ $^
 
 $(OBJ_DIR)%.o: $(SRCS_DIR)%.c
 	@mkdir -p $(@D)

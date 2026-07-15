@@ -1,12 +1,11 @@
 #ifndef FT_MALLOC_INTERN
 # define FT_MALLOC_INTERN
 
-#include <assert.h>
 # include <stdbool.h>
-# include <stddef.h>
 # include <stdint.h>
-# include <stdio.h>
 # include <unistd.h>
+# include <string.h>
+# include <signal.h>
 
 # define MAX_PAGE_BEFOR_FREE 2
 # define max_tiny 256
@@ -124,16 +123,13 @@ check_cheksum(void const* ptr) {
 	return (CHECKSUM(current_chunk->flags, NUMBERS_OF_FLAGS) == CHECKSUM(current_chunk, NUMBERS_OF_FLAGS));
 }
 
-// /**
-//  * @brief Get the page from t_chunk, WARN this func return the start of the page!
-//  * 
-//  * @param chunk reference point to find the page.
-//  * @return void* addrs of t_page
-//  */
-// static inline void*
-// get_page_from_chunk(t_chunk* chunk) {
-// 	return (ptr_sub(chunk, (size_t)chunk & (PAGE_SIZE - 1)));
-// }
+static inline void
+panic(int fd, char* str) {
+	write(fd, str, strlen(str));
+# ifdef DEBUG
+	kill(0, SIGABRT);
+# endif
+}
 
 /**
  * @brief return aligned size
@@ -151,6 +147,7 @@ align_as(size_t size, uint16_t align) {
 }
 
 void*	make_pages(uint8_t const map_type, uint8_t nb_pages, t_page* last_page);
+t_page*	get_page_from_chunk(t_chunk* chunk, uint8_t map_type);
 void*	alloc_large_page(size_t size);
 void	free_all_page(void);
 

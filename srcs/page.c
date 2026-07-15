@@ -1,11 +1,7 @@
 
 #include "ft_malloc_intern.h"
 
-#include <stddef.h>
-#include <stdint.h>
 #include <sys/mman.h>
-#include <assert.h>
-#include <unistd.h>
 
 static void
 free_page_from_map(uint8_t map_type) {
@@ -25,6 +21,19 @@ void
 free_all_page(void) {
 	free_page_from_map(TINY);
 	free_page_from_map(SMALL);
+}
+
+t_page*
+get_page_from_chunk(t_chunk* chunk, uint8_t map_type) {
+	t_page*	current_page;
+
+	current_page = g_malloc.map[map_type];
+	while (current_page) {
+		if ((size_t)current_page < (size_t)chunk && (size_t)ptr_sub(chunk, (size_t)current_page) < current_page->size)
+			return (current_page);
+		current_page = current_page->next;
+	}
+	return (NULL);
 }
 
 void*

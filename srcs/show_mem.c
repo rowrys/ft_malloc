@@ -1,8 +1,6 @@
 
 #include "ft_malloc_intern.h"
 
-#include <stddef.h>
-#include <stdint.h>
 #include <stdio.h>
 
 static size_t
@@ -24,10 +22,9 @@ show_map(uint8_t map_type) {
 			if (!get_crnt_chunk_free_flag(current_chunk)) {
 				used_mem = chunk_size;
 				total_used_mem += used_mem;
-				printf("%p - %p : %lu Bytes\n", ptr_add(current_chunk, sizeof(t_chunk)), ptr_add(current_chunk, sizeof(t_chunk) + used_mem), used_mem);
+				printf("%p - %p : %lu bytes\n", ptr_add(current_chunk, sizeof(t_chunk)), ptr_add(current_chunk, sizeof(t_chunk) + used_mem), used_mem);
 			}
 		} while (get_free_space_after_chunk(current_page, current_chunk) > sizeof(t_chunk));
-		printf("other page!\n");
 		current_page = current_page->next;
 	}
 	return (total_used_mem);
@@ -44,5 +41,5 @@ show_alloc_mem(void) {
 	total_used_mem += show_map(SMALL);
 	printf("LARGE : %p\n", (void*)g_malloc.map[LARGE]);
 	total_used_mem += show_map(LARGE);
-	printf("Total : %lu\n", total_used_mem);
+	printf("Total : %lu bytes\n", total_used_mem);
 }
