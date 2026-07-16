@@ -41,11 +41,10 @@ expand(t_chunk* current_chunk, size_t size) {
 		return (NULL);
 	if (get_free_space_after_chunk(page, current_chunk) > sizeof(t_chunk)) {
 		next_chunk = ptr_add(current_chunk, sizeof(t_chunk) + current_chunk->size);
-		if (get_crnt_chunk_free_flag(next_chunk) && next_chunk->size + sizeof(t_chunk) >= extra_size) {
+		if (get_crnt_chunk_free_flag(next_chunk) && next_chunk->size >= extra_size) {
 			current_chunk->size += extra_size;
-			next_chunk->size -= (extra_size - sizeof(t_chunk));
-			if (next_chunk->size >= sizeof(t_chunk))
-				write_chunk_header(ptr_add(current_chunk, sizeof(t_chunk) + current_chunk->size), MAPTYPE(map_type) | FREE(1), next_chunk->size);
+			next_chunk->size -= extra_size;
+			write_chunk_header(ptr_add(current_chunk, sizeof(t_chunk) + current_chunk->size), MAPTYPE(map_type) | FREE(1), next_chunk->size);
 			return (ptr_add(current_chunk, sizeof(t_chunk)));
 		}
 	}
@@ -70,7 +69,7 @@ ft_realloc(void* ptr, size_t size) {
 	}
 	size = align_as(size, _Alignof(void*));
 	new_ptr = try_reduce(chunk, size);
-	if (!new_ptr)
+	if (new_ptr)
 		return (new_ptr);
 	return (expand(chunk, size));
 }
