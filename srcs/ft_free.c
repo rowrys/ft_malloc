@@ -34,7 +34,7 @@ merge_free_chunk(t_page* page, t_chunk* chunk) {
 	if (!(get_free_space_after_chunk(page, chunk) > sizeof(t_chunk)))
 		return ;
 	next_chunk = ptr_add(chunk, sizeof(t_chunk) + chunk->size);
-	chunk->size = (get_crnt_chunk_free_flag(next_chunk)) ? chunk->size + sizeof(t_chunk) + next_chunk->size : chunk->size;
+	chunk->size = (get_chunk_free_flag(next_chunk)) ? chunk->size + sizeof(t_chunk) + next_chunk->size : chunk->size;
 }
 
 static void
@@ -73,7 +73,7 @@ check_pointeur(void* ptr, t_page** page, t_chunk** chunk) {
 		return (1);
 	}
 	*chunk = ptr_sub(ptr, sizeof(t_chunk));
-	if (get_crnt_chunk_free_flag(*chunk)) {
+	if (get_chunk_free_flag(*chunk)) {
 		panic(STDERR_FILENO, "ft_free(): double free detected\n");
 		return (1);
 	}
@@ -101,7 +101,7 @@ ft_free(void* ptr) {
 		return ;
 	}
 	--g_malloc.total_alloc;
-	set_crnt_chunk_free_flag(chunk, 1);
+	set_chunk_free_flag(chunk, 1);
 	merge_free_chunk(page, chunk);
 	check_for_munmap(map_type);
 	if (!g_malloc.total_alloc) {

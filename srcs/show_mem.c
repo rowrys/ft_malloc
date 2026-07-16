@@ -19,7 +19,7 @@ show_map(uint8_t map_type) {
 		do {
 			current_chunk = ptr_add(current_chunk, sizeof(t_chunk) + chunk_size);
 			chunk_size = current_chunk->size;
-			if (!get_crnt_chunk_free_flag(current_chunk)) {
+			if (!get_chunk_free_flag(current_chunk)) {
 				used_mem = chunk_size;
 				total_used_mem += used_mem;
 				printf("%p - %p : %lu bytes\n", ptr_add(current_chunk, sizeof(t_chunk)), ptr_add(current_chunk, sizeof(t_chunk) + used_mem), used_mem);

@@ -41,7 +41,7 @@ expand(t_chunk* current_chunk, size_t size) {
 		return (NULL);
 	if (get_free_space_after_chunk(page, current_chunk) > sizeof(t_chunk)) {
 		next_chunk = ptr_add(current_chunk, sizeof(t_chunk) + current_chunk->size);
-		if (get_crnt_chunk_free_flag(next_chunk) && next_chunk->size >= extra_size) {
+		if (get_chunk_free_flag(next_chunk) && next_chunk->size >= extra_size) {
 			current_chunk->size += extra_size;
 			next_chunk->size -= extra_size;
 			write_chunk_header(ptr_add(current_chunk, sizeof(t_chunk) + current_chunk->size), MAPTYPE(map_type) | FREE(1), next_chunk->size);
@@ -63,7 +63,7 @@ ft_realloc(void* ptr, size_t size) {
 		return (NULL);
 	}
 	chunk = ptr_sub(ptr, sizeof(t_chunk));
-	if (!check_cheksum(ptr) || get_crnt_chunk_free_flag(chunk)) {
+	if (!check_cheksum(ptr) || get_chunk_free_flag(chunk)) {
 		panic(STDERR_FILENO, "ft_realloc(): invalid pointer\n");
 		return (NULL);
 	}

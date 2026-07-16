@@ -95,12 +95,12 @@ write_chunk_header(t_chunk* chunk, size_t const flags, size_t const size) {
 }
 
 static inline bool
-get_crnt_chunk_free_flag(t_chunk* current_chunk) {
+get_chunk_free_flag(t_chunk* current_chunk) {
 	return (current_chunk->flags & CRNT_CHUNK_FREE);
 }
 
 static inline void
-set_crnt_chunk_free_flag(t_chunk* current_chunk, bool const state) {
+set_chunk_free_flag(t_chunk* current_chunk, bool const state) {
 	current_chunk->flags = (state) ? current_chunk->flags | CRNT_CHUNK_FREE : current_chunk->flags & ~CRNT_CHUNK_FREE;
 }
 
