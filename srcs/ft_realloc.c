@@ -21,11 +21,11 @@ static void*
 expand_failed(t_chunk* current_chunk, size_t size) {
 	void* new_ptr;
 
-	new_ptr = ft_malloc(size);
+	new_ptr = malloc(size);
 	if (!new_ptr)
 		return (NULL);
 	memcpy(new_ptr, ptr_add(current_chunk, sizeof(t_chunk)), current_chunk->size);
-	ft_free(ptr_add(current_chunk, sizeof(t_chunk)));
+	free(ptr_add(current_chunk, sizeof(t_chunk)));
 	return (new_ptr);
 }
 
@@ -52,19 +52,19 @@ expand(t_chunk* current_chunk, size_t size) {
 }
 
 void*
-ft_realloc(void* ptr, size_t size) {
+realloc(void* ptr, size_t size) {
 	void*		new_ptr;
 	t_chunk*	chunk;
 
 	if (!ptr)
-		return (ft_malloc(size));
+		return (malloc(size));
 	else if (!size) {
-		ft_free(ptr);
+		free(ptr);
 		return (NULL);
 	}
 	chunk = ptr_sub(ptr, sizeof(t_chunk));
 	if (!check_cheksum(ptr) || get_chunk_free_flag(chunk)) {
-		panic(STDERR_FILENO, "ft_realloc(): invalid pointer\n");
+		panic(STDERR_FILENO, "realloc(): invalid pointer\n");
 		return (NULL);
 	}
 	size = align_as(size, _Alignof(void*));

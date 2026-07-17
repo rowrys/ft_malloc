@@ -5,3 +5,5 @@ peda-session-ft_malloc.txt
 .build
 libft
 TODO.md
+libft_malloc_x86_64_Linux.so
+a.out

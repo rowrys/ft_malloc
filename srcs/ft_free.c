@@ -24,7 +24,7 @@ free_large(t_page* page) {
 		prev_page = current_page;
 		current_page = current_page->next;
 	}
-	panic(STDERR_FILENO, "ft_free(): invalid pointer\n");
+	panic(STDERR_FILENO, "free(): invalid pointer\n");
 }
 
 static void
@@ -69,12 +69,12 @@ check_pointeur(void* ptr, t_page** page, t_chunk** chunk) {
 	if (!ptr)
 		return (1);
 	if (!check_cheksum(ptr)) {
-		panic(STDERR_FILENO, "ft_free(): invalid pointer\n");
+		panic(STDERR_FILENO, "free(): invalid pointer\n");
 		return (1);
 	}
 	*chunk = ptr_sub(ptr, sizeof(t_chunk));
 	if (get_chunk_free_flag(*chunk)) {
-		panic(STDERR_FILENO, "ft_free(): double free detected\n");
+		panic(STDERR_FILENO, "free(): double free detected\n");
 		return (1);
 	}
 	*page = get_page_from_chunk(*chunk, get_map_type_flag(*chunk));
@@ -86,7 +86,7 @@ check_pointeur(void* ptr, t_page** page, t_chunk** chunk) {
 }
 
 void
-ft_free(void* ptr) {
+free(void* ptr) {
 	t_chunk*	chunk;
 	t_page*		page;
 	uint8_t		map_type;
