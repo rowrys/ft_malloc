@@ -2,6 +2,7 @@
 #include "ft_malloc.h"
 #include "ft_malloc_intern.h"
 
+#include <stddef.h>
 #include <stdio.h>
 #include <sys/mman.h>
 
@@ -86,5 +87,8 @@ malloc(size_t size) {
 	else
 		result = alloc_large(align_size);
 	g_malloc.total_alloc = (result) ? g_malloc.total_alloc + 1 : g_malloc.total_alloc;
+	# ifdef DEBUG
+	check_page_integrity();
+	# endif
 	return (result);
 }

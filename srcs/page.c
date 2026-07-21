@@ -1,6 +1,8 @@
 
 #include "ft_malloc_intern.h"
 
+#include <stddef.h>
+#include <stdint.h>
 #include <sys/mman.h>
 
 static void
@@ -15,6 +17,28 @@ free_page_from_map(uint8_t map_type) {
 		current_page = next_page;
 	}
 	g_malloc.map[map_type] = NULL;
+}
+
+void
+check_page_integrity(void) {
+	t_page*		current_page;
+	t_chunk*	current_chunk;
+	size_t		chunk_size;
+
+	for (uint8_t i = TINY; i <= LARGE; ++i) {
+		current_page = g_malloc.map[i];
+		while (current_page) {
+			current_chunk = ptr_add(current_page, sizeof(t_page) - sizeof(t_chunk));
+			chunk_size = 0;
+			do {
+				current_chunk = ptr_add(current_chunk, sizeof(t_chunk) + chunk_size);
+				chunk_size = current_chunk->size;
+				if (!check_cheksum(ptr_add(current_chunk, sizeof(t_chunk))))
+					panic(2, "ERROR: page error, test for page_integrity failed.\n");
+			} while (get_free_space_after_chunk(current_page, current_chunk) > sizeof(t_chunk));
+			current_page = current_page->next;
+		}
+	}
 }
 
 void
