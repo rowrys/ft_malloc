@@ -58,7 +58,7 @@ check_for_munmap(uint8_t map_type) {
 	current_page = g_malloc.map[map_type];
 	while (current_page) {
 		current_chunk = ptr_add(current_page, sizeof(t_page));
-		if (current_chunk->size == (current_page->size - sizeof(t_page) - sizeof(t_chunk))) {
+		if (current_chunk->size == (current_page->size - sizeof(t_page) - sizeof(t_chunk)) && get_chunk_free_flag(current_chunk)) {
 			++nb_empty_page;
 			if (nb_empty_page > MAX_PAGE_BEFOR_FREE) {
 				if (!prev_page)
