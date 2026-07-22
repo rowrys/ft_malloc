@@ -28,13 +28,22 @@ free_large(t_page* page) {
 }
 
 static void
-merge_free_chunk(t_page* page, t_chunk* chunk) {
+merge_free_chunk(uint8_t map_type) {
+	t_page*		current_page;
+	t_chunk*	current_chunk;
 	t_chunk*	next_chunk;
 
-	if (!(get_free_space_after_chunk(page, chunk) > sizeof(t_chunk)))
-		return ;
-	next_chunk = ptr_add(chunk, sizeof(t_chunk) + chunk->size);
-	chunk->size = (get_chunk_free_flag(next_chunk)) ? chunk->size + sizeof(t_chunk) + next_chunk->size : chunk->size;
+	current_page = g_malloc.map[map_type];
+	while (current_page) {
+		current_chunk = ptr_add(current_page, sizeof(t_page));
+		while (get_free_space_after_chunk(current_page, current_chunk)) {
+			next_chunk = ptr_add(current_chunk, sizeof(t_chunk) + current_chunk->size);
+			current_chunk->size = (get_chunk_free_flag(current_chunk) && get_chunk_free_flag(next_chunk)) ? current_chunk->size + sizeof(t_chunk) + next_chunk->size : current_chunk->size;
+			current_chunk = (get_chunk_free_flag(current_chunk) && get_chunk_free_flag(next_chunk)) ? current_chunk : next_chunk;
+		}
+		current_page = current_page->next;
+	}
+
 }
 
 static void
@@ -102,7 +111,7 @@ free(void* ptr) {
 	}
 	--g_malloc.total_alloc;
 	set_chunk_free_flag(chunk, 1);
-	merge_free_chunk(page, chunk);
+	merge_free_chunk(map_type);
 	check_for_munmap(map_type);
 	if (!g_malloc.total_alloc) {
 		free_all_page();
