@@ -18,7 +18,6 @@ free_large(t_page* page) {
 			else
 				prev_page->next = current_page->next;
 			munmap(page, page->size);
-			--g_malloc.total_alloc;
 			return ;
 		}
 		prev_page = current_page;
@@ -105,16 +104,9 @@ free(void* ptr) {
 	map_type = get_map_type_flag(chunk);
 	if (map_type == LARGE) {
 		free_large(page);
-		if (!g_malloc.total_alloc)
-			free_all_page();
 		return ;
 	}
-	--g_malloc.total_alloc;
 	set_chunk_free_flag(chunk, 1);
 	merge_free_chunk(map_type);
 	check_for_munmap(map_type);
-	if (!g_malloc.total_alloc) {
-		free_all_page();
-		return ;
-	}
 }

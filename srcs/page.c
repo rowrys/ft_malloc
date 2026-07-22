@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <sys/mman.h>
 
 static void
@@ -45,6 +46,7 @@ void
 free_all_page(void) {
 	free_page_from_map(TINY);
 	free_page_from_map(SMALL);
+	free_page_from_map(LARGE);
 }
 
 t_page*

@@ -86,7 +86,6 @@ malloc(size_t size) {
 		result = alloc(SMALL, M, align_size);
 	else
 		result = alloc_large(align_size);
-	g_malloc.total_alloc = (result) ? g_malloc.total_alloc + 1 : g_malloc.total_alloc;
 	# ifdef DEBUG
 	check_page_integrity();
 	# endif

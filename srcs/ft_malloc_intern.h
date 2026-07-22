@@ -33,7 +33,6 @@ typedef struct s_chunk {
 
 typedef struct s_malloc {
 	t_page*	map[3];
-	size_t	total_alloc;
 }	t_malloc;
 
 typedef enum e_memory_zone {
@@ -150,7 +149,7 @@ align_as(size_t size, uint16_t align) {
 void*	make_pages(uint8_t const map_type, uint8_t nb_pages, t_page* last_page);
 t_page*	get_page_from_chunk(t_chunk* chunk, uint8_t map_type);
 void*	alloc_large_page(size_t size);
-void	free_all_page(void);
+void	free_all_page(void) __attribute__((destructor));
 void	check_page_integrity(void);
 
 extern t_malloc g_malloc;
