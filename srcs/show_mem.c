@@ -16,8 +16,11 @@ show_map(uint8_t map_type) {
 	size_t		used_mem;
 	size_t		chunk_size;
 	size_t		total_used_mem;
+	size_t		nb_pages;
 
+	(void)nb_pages;
 	total_used_mem = 0;
+	nb_pages = 0;
 	current_page = g_malloc.map[map_type];
 	while (current_page) {
 		current_chunk = ptr_add(current_page, sizeof(t_page) - sizeof(t_chunk));
@@ -36,8 +39,12 @@ show_map(uint8_t map_type) {
 			# endif
 
 		} while (get_free_space_after_chunk(current_page, current_chunk) > sizeof(t_chunk));
+		++nb_pages;
 		current_page = current_page->next;
 	}
+	# ifdef DEBUG
+	printf("numbers of pages: %lu\n", nb_pages);
+	# endif
 	return (total_used_mem);
 }
 
