@@ -77,7 +77,7 @@ malloc(size_t size) {
 	void*	result;
 	size_t	align_size;
 
-	align_size = align_as(size, _Alignof(void*));
+	align_size = align_as(size, _Alignof(max_align_t));
 	if (!size || align_size < size)
 		return (NULL);
 	if (align_size <= max_tiny)

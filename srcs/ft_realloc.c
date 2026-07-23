@@ -67,7 +67,7 @@ realloc(void* ptr, size_t size) {
 		panic(STDERR_FILENO, "realloc(): invalid pointer\n");
 		return (NULL);
 	}
-	size = align_as(size, _Alignof(void*));
+	size = align_as(size, _Alignof(max_align_t));
 	new_ptr = try_reduce(chunk, size);
 	if (new_ptr)
 		return (new_ptr);
