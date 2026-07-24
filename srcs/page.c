@@ -47,6 +47,7 @@ free_all_page(void) {
 	free_page_from_map(TINY);
 	free_page_from_map(SMALL);
 	free_page_from_map(LARGE);
+	pthread_mutex_destroy(&g_malloc.lock);
 }
 
 t_page*

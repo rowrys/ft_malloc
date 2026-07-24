@@ -24,7 +24,9 @@ expand_failed(t_chunk* current_chunk, size_t size) {
 	new_ptr = malloc(size);
 	if (!new_ptr)
 		return (NULL);
+	pthread_mutex_lock(&g_malloc.lock);
 	memcpy(new_ptr, ptr_add(current_chunk, sizeof(t_chunk)), current_chunk->size);
+	pthread_mutex_unlock(&g_malloc.lock);
 	free(ptr_add(current_chunk, sizeof(t_chunk)));
 	return (new_ptr);
 }
@@ -37,17 +39,21 @@ expand(t_chunk* current_chunk, size_t size) {
 	size_t const	extra_size = size - current_chunk->size;
 
 	page = get_page_from_chunk(current_chunk, map_type);
-	if (!page)
+	if (!page) {
+		pthread_mutex_unlock(&g_malloc.lock);
 		return (NULL);
+	}
 	if (get_free_space_after_chunk(page, current_chunk) > sizeof(t_chunk)) {
 		next_chunk = ptr_add(current_chunk, sizeof(t_chunk) + current_chunk->size);
 		if (get_chunk_free_flag(next_chunk) && next_chunk->size >= extra_size) {
 			current_chunk->size += extra_size;
 			next_chunk->size -= extra_size;
 			write_chunk_header(ptr_add(current_chunk, sizeof(t_chunk) + current_chunk->size), MAPTYPE(map_type) | FREE(1), next_chunk->size);
+			pthread_mutex_unlock(&g_malloc.lock);
 			return (ptr_add(current_chunk, sizeof(t_chunk)));
 		}
 	}
+	pthread_mutex_unlock(&g_malloc.lock);
 	return (expand_failed(current_chunk, size));
 }
 
@@ -62,14 +68,18 @@ realloc(void* ptr, size_t size) {
 		free(ptr);
 		return (NULL);
 	}
+	pthread_mutex_lock(&g_malloc.lock);
 	chunk = ptr_sub(ptr, sizeof(t_chunk));
 	if (!check_cheksum(ptr) || get_chunk_free_flag(chunk)) {
 		panic(STDERR_FILENO, "realloc(): invalid pointer\n");
+		pthread_mutex_unlock(&g_malloc.lock);
 		return (NULL);
 	}
 	size = align_as(size, _Alignof(max_align_t));
 	new_ptr = try_reduce(chunk, size);
-	if (new_ptr)
+	if (new_ptr) {
+		pthread_mutex_unlock(&g_malloc.lock);
 		return (new_ptr);
+	}
 	return (expand(chunk, size));
 }

@@ -6,7 +6,10 @@
 #include <stdio.h>
 # include <unistd.h>
 # include <string.h>
-# include <signal.h>
+# include <pthread.h>
+# ifdef DEBUG
+#  include <signal.h>
+# endif
 
 # define MAX_PAGE_BEFOR_FREE 2
 # define max_tiny 256
@@ -32,7 +35,8 @@ typedef struct s_chunk {
 }	t_chunk;
 
 typedef struct s_malloc {
-	t_page*	map[3];
+	t_page*			map[3];
+	pthread_mutex_t	lock;
 }	t_malloc;
 
 typedef enum e_memory_zone {
@@ -150,6 +154,7 @@ void*	make_pages(uint8_t const map_type, uint8_t nb_pages, t_page* last_page);
 t_page*	get_page_from_chunk(t_chunk* chunk, uint8_t map_type);
 void*	alloc_large_page(size_t size);
 void	free_all_page(void) __attribute__((destructor));
+void	init_malloc(void) __attribute__((constructor));
 void	check_page_integrity(void);
 
 extern t_malloc g_malloc;

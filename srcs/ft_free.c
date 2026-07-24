@@ -99,14 +99,19 @@ free(void* ptr) {
 	t_page*		page;
 	uint8_t		map_type;
 
-	if (check_pointeur(ptr, &page, &chunk))
+	pthread_mutex_lock(&g_malloc.lock);
+	if (check_pointeur(ptr, &page, &chunk)) {
+		pthread_mutex_unlock(&g_malloc.lock);
 		return ;
+	}
 	map_type = get_map_type_flag(chunk);
 	if (map_type == LARGE) {
 		free_large(page);
+		pthread_mutex_unlock(&g_malloc.lock);
 		return ;
 	}
 	set_chunk_free_flag(chunk, 1);
 	merge_free_chunk(map_type);
 	check_for_munmap(map_type);
+	pthread_mutex_unlock(&g_malloc.lock);
 }

@@ -80,6 +80,7 @@ malloc(size_t size) {
 	align_size = align_as(size, _Alignof(max_align_t));
 	if (!size || align_size < size)
 		return (NULL);
+	pthread_mutex_lock(&g_malloc.lock);
 	if (align_size <= max_tiny)
 		result = alloc(TINY, N, align_size);
 	else if (align_size <= max_small)
@@ -89,5 +90,11 @@ malloc(size_t size) {
 	# ifdef DEBUG
 	check_page_integrity();
 	# endif
+	pthread_mutex_unlock(&g_malloc.lock);
 	return (result);
+}
+
+void
+init_malloc(void) {
+	pthread_mutex_init(&g_malloc.lock, NULL);
 }

@@ -53,6 +53,7 @@ void
 show_alloc_mem(void) {
 	size_t	total_used_mem;
 
+	pthread_mutex_lock(&g_malloc.lock);
 	total_used_mem = 0;
 	ft_printf("TINY : %p\n", (void*)g_malloc.map[TINY]);
 	total_used_mem += show_map(TINY);
@@ -61,4 +62,5 @@ show_alloc_mem(void) {
 	ft_printf("LARGE : %p\n", (void*)g_malloc.map[LARGE]);
 	total_used_mem += show_map(LARGE);
 	ft_printf("Total : %l bytes\n", total_used_mem);
+	pthread_mutex_unlock(&g_malloc.lock);
 }
