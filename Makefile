@@ -19,6 +19,8 @@ CFLAGS := -MP -MMD -Wall -Werror -Wextra -std=gnu11 -pedantic-errors -g
 CFLAGS_TEST := -g
 INCLUDE := -I includes/ -I libft/includes/
 
+LIB := libft/libft.a
+
 ifeq ($(MAKECMDGOALS),debug)
 CFLAGS += -D DEBUG
 endif
@@ -27,10 +29,11 @@ all: $(NAME) $(BIN)
 debug: $(NAME) $(BIN)
 
 $(NAME): $(OBJS)
-	ar rcs $@ $^
+	$(MAKE) --no-print-directory -C libft/
+	ar rcs $@ $(LIB) $^
 
 $(BIN): $(NAME)
-	$(CC) test.c $(NAME) $(CFLAGS_TEST)
+	$(CC) test.c $(NAME) $(LIB) $(CFLAGS_TEST)
 
 $(OBJ_DIR)%.o: $(SRCS_DIR)%.c
 	@mkdir -p $(@D)
@@ -40,9 +43,11 @@ gdb: $(NAME)
 	gdb -tui $(NAME)
 
 clean:
+	$(MAKE) clean -C libft/
 	rm -rf $(OBJ_DIR)
 
 fclean: clean
+	$(MAKE) fclean -C libft/
 	rm -rf $(NAME)
 	rm -fr $(BIN)
 

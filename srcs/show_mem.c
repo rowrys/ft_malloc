@@ -1,12 +1,13 @@
 
 #include "ft_malloc_intern.h"
+#include "ft_printf.h"
 
 #include <stddef.h>
 #include <stdio.h>
 
 static inline void
 display_chunk(char* fmt, t_chunk* current_chunk, size_t used_mem) {
-	printf(fmt, ptr_add(current_chunk, sizeof(t_chunk)), ptr_add(current_chunk, sizeof(t_chunk) + used_mem), used_mem);
+	ft_printf(fmt, ptr_add(current_chunk, sizeof(t_chunk)), ptr_add(current_chunk, sizeof(t_chunk) + used_mem), used_mem);
 } 
 
 static size_t
@@ -31,11 +32,11 @@ show_map(uint8_t map_type) {
 			used_mem = chunk_size;
 			if (!get_chunk_free_flag(current_chunk)) {
 				total_used_mem += used_mem;
-				display_chunk("%p - %p : %lu bytes\n", current_chunk, used_mem);
+				display_chunk("%p - %p : %l bytes\n", current_chunk, used_mem);
 			}
 			# ifdef DEBUG
 			else
-				display_chunk("FREE: %p - %p : %lu bytes\n", current_chunk, used_mem);
+				display_chunk("FREE: %p - %p : %l bytes\n", current_chunk, used_mem);
 			# endif
 
 		} while (get_free_space_after_chunk(current_page, current_chunk) > sizeof(t_chunk));
@@ -43,7 +44,7 @@ show_map(uint8_t map_type) {
 		current_page = current_page->next;
 	}
 	# ifdef DEBUG
-	printf("numbers of pages: %lu\n", nb_pages);
+	ft_printf("numbers of pages: %l\n", nb_pages);
 	# endif
 	return (total_used_mem);
 }
@@ -53,11 +54,11 @@ show_alloc_mem(void) {
 	size_t	total_used_mem;
 
 	total_used_mem = 0;
-	printf("TINY : %p\n", (void*)g_malloc.map[TINY]);
+	ft_printf("TINY : %p\n", (void*)g_malloc.map[TINY]);
 	total_used_mem += show_map(TINY);
-	printf("SMALL : %p\n", (void*)g_malloc.map[SMALL]);
+	ft_printf("SMALL : %p\n", (void*)g_malloc.map[SMALL]);
 	total_used_mem += show_map(SMALL);
-	printf("LARGE : %p\n", (void*)g_malloc.map[LARGE]);
+	ft_printf("LARGE : %p\n", (void*)g_malloc.map[LARGE]);
 	total_used_mem += show_map(LARGE);
-	printf("Total : %lu bytes\n", total_used_mem);
+	ft_printf("Total : %l bytes\n", total_used_mem);
 }
