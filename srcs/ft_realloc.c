@@ -9,7 +9,7 @@ try_reduce(t_chunk* chunk, size_t size) {
 
 	if (chunk->size == size)
 		return (ptr_add(chunk, sizeof(t_chunk)));
-	else if (chunk->size > size) {
+	else if (chunk->size > size + sizeof(t_chunk)) {
 		chunk->size = size;
 		write_chunk_header(ptr_add(chunk, size + sizeof(t_chunk)), MAPTYPE(map_type) | FREE(1), chunk_size - sizeof(t_chunk) - size);
 		return (ptr_add(chunk, sizeof(t_chunk)));
@@ -43,9 +43,9 @@ expand(t_chunk* current_chunk, size_t size) {
 		pthread_mutex_unlock(&g_malloc.lock);
 		return (NULL);
 	}
-	if (get_free_space_after_chunk(page, current_chunk) > sizeof(t_chunk)) {
+	if (get_free_space_after_chunk(page, current_chunk) >= sizeof(t_chunk)) {
 		next_chunk = ptr_add(current_chunk, sizeof(t_chunk) + current_chunk->size);
-		if (get_chunk_free_flag(next_chunk) && next_chunk->size >= extra_size) {
+		if (get_chunk_free_flag(next_chunk) && next_chunk->size >= extra_size + sizeof(t_chunk)) {
 			current_chunk->size += extra_size;
 			next_chunk->size -= extra_size;
 			write_chunk_header(ptr_add(current_chunk, sizeof(t_chunk) + current_chunk->size), MAPTYPE(map_type) | FREE(1), next_chunk->size);

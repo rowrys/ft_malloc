@@ -36,7 +36,7 @@ check_page_integrity(void) {
 				chunk_size = current_chunk->size;
 				if (!check_cheksum(ptr_add(current_chunk, sizeof(t_chunk))))
 					panic(2, "ERROR: page error, test for page_integrity failed.\n");
-			} while (get_free_space_after_chunk(current_page, current_chunk) > sizeof(t_chunk));
+			} while (get_free_space_after_chunk(current_page, current_chunk) >= sizeof(t_chunk));
 			current_page = current_page->next;
 		}
 	}

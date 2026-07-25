@@ -35,7 +35,7 @@ merge_free_chunk(uint8_t map_type) {
 	current_page = g_malloc.map[map_type];
 	while (current_page) {
 		current_chunk = ptr_add(current_page, sizeof(t_page));
-		while (get_free_space_after_chunk(current_page, current_chunk)) {
+		while (get_free_space_after_chunk(current_page, current_chunk) >= sizeof(t_chunk)) {
 			next_chunk = ptr_add(current_chunk, sizeof(t_chunk) + current_chunk->size);
 			current_chunk->size = (get_chunk_free_flag(current_chunk) && get_chunk_free_flag(next_chunk)) ? current_chunk->size + sizeof(t_chunk) + next_chunk->size : current_chunk->size;
 			current_chunk = (get_chunk_free_flag(current_chunk) && get_chunk_free_flag(next_chunk)) ? current_chunk : next_chunk;
@@ -68,6 +68,7 @@ check_for_munmap(uint8_t map_type) {
 				return ;
 			}
 		}
+		prev_page = current_page;
 		current_page = current_page->next;
 	}
 }

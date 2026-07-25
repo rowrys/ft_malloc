@@ -39,7 +39,7 @@ show_map(uint8_t map_type) {
 				display_chunk("FREE: %p - %p : %l bytes\n", current_chunk, used_mem);
 			# endif
 
-		} while (get_free_space_after_chunk(current_page, current_chunk) > sizeof(t_chunk));
+		} while (get_free_space_after_chunk(current_page, current_chunk) >= sizeof(t_chunk));
 		++nb_pages;
 		current_page = current_page->next;
 	}

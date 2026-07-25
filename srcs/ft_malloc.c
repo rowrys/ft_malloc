@@ -9,13 +9,12 @@
 t_malloc	g_malloc;
 
 static void*
-split_chunk(t_page* current_page, t_chunk* current_chunk, size_t size, uint8_t map_type) {
+split_chunk(t_chunk* current_chunk, size_t size, uint8_t map_type) {
 	size_t const chunk_size = current_chunk->size;
 
 	set_chunk_free_flag(current_chunk, 0);
 	current_chunk->size = size;
-	if (get_free_space_after_chunk(current_page, current_chunk) > sizeof(t_chunk))
-		write_chunk_header(ptr_add(current_chunk, size + sizeof(t_chunk)), MAPTYPE(map_type) | FREE(1), chunk_size - sizeof(t_chunk) - size);
+	write_chunk_header(ptr_add(current_chunk, size + sizeof(t_chunk)), MAPTYPE(map_type) | FREE(1), chunk_size - sizeof(t_chunk) - size);
 	return (ptr_add(current_chunk, sizeof(t_chunk)));
 }
 
@@ -60,16 +59,16 @@ alloc(uint8_t map_type, uint8_t nb_page, size_t size) {
 		do {
 			current_chunk = ptr_add(current_chunk, sizeof(t_chunk) + chunk_size);
 			chunk_size = current_chunk->size;
-			if (get_chunk_free_flag(current_chunk) && chunk_size >= size)
-				return (split_chunk(current_page, current_chunk, size, map_type));
-		} while (get_free_space_after_chunk(current_page, current_chunk) > sizeof(t_chunk));
+			if (get_chunk_free_flag(current_chunk) && chunk_size >= size + sizeof(t_chunk))
+				return (split_chunk(current_chunk, size, map_type));
+		} while (get_free_space_after_chunk(current_page, current_chunk) >= sizeof(t_chunk));
 		prev_page = current_page;
 		current_page = current_page->next;
 	}
 	if (!make_pages(map_type, nb_page, prev_page))
 		return (NULL);
 	current_page = prev_page->next;
-	return (split_chunk(current_page, ptr_add(current_page, sizeof(t_page)), size, map_type));
+	return (split_chunk(ptr_add(current_page, sizeof(t_page)), size, map_type));
 }
 
 void*
