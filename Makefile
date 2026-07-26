@@ -1,5 +1,10 @@
 CC := cc
-NAME := libft_malloc_x86_64_Linux.so
+ifeq ($(HOSTTYPE),)
+HOSTTYPE := $(shell uname -m)_$(shell uname -s)
+endif
+NAME_LINKED := $(addprefix ft_malloc_, $(HOSTTYPE))
+NAME := $(addprefix libft_malloc_, $(HOSTTYPE))
+NAME := $(addprefix $(NAME), .so)
 BIN := a.out
 SRCS_DIR := srcs/
 SOURCES :=	ft_malloc.c	\
@@ -15,7 +20,7 @@ OBJS := $(SOURCES:$(SRCS_DIR)%.c=$(OBJ_DIR)%.o)
 
 DEPS := $(SOURCES:$(SRCS_DIR)%.c=$(OBJ_DIR)%.d)
 
-CFLAGS := -MP -MMD -Wall -Werror -Wextra -std=gnu11 -pedantic-errors -g
+CFLAGS := -MP -MMD -Wall -Werror -Wextra -std=gnu11 -pedantic-errors -fPIC -g
 CFLAGS_TEST := -g
 INCLUDE := -I includes/ -I libft/includes/
 
@@ -30,10 +35,10 @@ debug: $(NAME) $(BIN)
 
 $(NAME): $(OBJS)
 	$(MAKE) --no-print-directory -C libft/
-	ar rcs $@ $(LIB) $^
+	$(CC) -shared $(CFLAGS) -o $@ $^
 
 $(BIN): $(NAME)
-	$(CC) test.c $(NAME) $(LIB) $(CFLAGS_TEST)
+	$(CC) test.c -o $@ -L. -l$(NAME_LINKED) $(LIB) $(CFLAGS_TEST)
 
 $(OBJ_DIR)%.o: $(SRCS_DIR)%.c
 	@mkdir -p $(@D)

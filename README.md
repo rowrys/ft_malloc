@@ -315,7 +315,6 @@ Current limitations include:
 
 Possible future enhancements include:
 
-* true shared library build (`-fPIC` / `-shared`)
 * allocation benchmarks
 * faster free block lookup
 * improved multi-thread scalability
