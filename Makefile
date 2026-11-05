@@ -2,6 +2,7 @@ CC := cc
 ifeq ($(HOSTTYPE),)
 HOSTTYPE := $(shell uname -m)_$(shell uname -s)
 endif
+NAME_SYMBOLIC_LINK := libft_malloc.so
 NAME_LINKED := $(addprefix ft_malloc_, $(HOSTTYPE))
 NAME := $(addprefix libft_malloc_, $(HOSTTYPE))
 NAME := $(addprefix $(NAME), .so)
@@ -35,7 +36,9 @@ debug: $(NAME) $(BIN)
 
 $(NAME): $(OBJS)
 	$(MAKE) --no-print-directory -C libft/
+# 	ar rcs -o $(NAME) $(OBJS)
 	$(CC) -shared $(CFLAGS) -o $@ $^
+	ln -sf ./$(NAME) ./$(NAME_SYMBOLIC_LINK)
 
 $(BIN): $(NAME)
 	$(CC) test.c -o $@ -L. -l$(NAME_LINKED) $(LIB) $(CFLAGS_TEST)
@@ -53,6 +56,7 @@ clean:
 
 fclean: clean
 	$(MAKE) fclean -C libft/
+	rm -rf $(NAME_SYMBOLIC_LINK)
 	rm -rf $(NAME)
 	rm -fr $(BIN)
 
