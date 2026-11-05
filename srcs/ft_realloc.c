@@ -1,6 +1,7 @@
 
 #include "ft_malloc.h"
 #include "ft_malloc_intern.h"
+#include <stddef.h>
 
 static void*
 try_reduce(t_chunk* chunk, size_t size) {
@@ -59,6 +60,7 @@ expand(t_chunk* current_chunk, size_t size) {
 
 void*
 realloc(void* ptr, size_t size) {
+	size_t		align_size;
 	void*		new_ptr;
 	t_chunk*	chunk;
 
@@ -75,11 +77,13 @@ realloc(void* ptr, size_t size) {
 		pthread_mutex_unlock(&g_malloc.lock);
 		return (NULL);
 	}
-	size = align_as(size, _Alignof(max_align_t));
-	new_ptr = try_reduce(chunk, size);
+	align_size = align_as(size, _Alignof(max_align_t));
+	if (size > align_size)
+		return (NULL);
+	new_ptr = try_reduce(chunk, align_size);
 	if (new_ptr) {
 		pthread_mutex_unlock(&g_malloc.lock);
 		return (new_ptr);
 	}
-	return (expand(chunk, size));
+	return (expand(chunk, align_size));
 }

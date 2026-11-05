@@ -26,6 +26,8 @@ alloc_large(size_t size) {
 	size_t		alloc_size;
 
 	alloc_size = align_as(sizeof(t_page) + (sizeof(t_chunk) * 2) + size, PAGE_SIZE);
+	if (size > alloc_size)
+		return (NULL);
 	new_page = mmap(NULL, alloc_size, MALLOC_PROT_MMAP, MALLOC_FLAG_MMAP, -1, 0);
 	if (new_page == MAP_FAILED)
 		return (NULL);
