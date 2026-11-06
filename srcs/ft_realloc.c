@@ -78,8 +78,10 @@ realloc(void* ptr, size_t size) {
 		return (NULL);
 	}
 	align_size = align_as(size, _Alignof(max_align_t));
-	if (size > align_size)
+	if (size > align_size) {
+		pthread_mutex_unlock(&g_malloc.lock);
 		return (NULL);
+	}
 	new_ptr = try_reduce(chunk, align_size);
 	if (new_ptr) {
 		pthread_mutex_unlock(&g_malloc.lock);
